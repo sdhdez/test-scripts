@@ -19,7 +19,11 @@ for f in `find $EXPLORE_DIR -type f`; do
   FULL_DIRPATH=$EXPORT_DIR${f%/*};
   TMP_FILENAME=$FULL_DIRPATH"/"${f##*/};
   mkdir -p $FULL_DIRPATH;
-  FULL_FILENAME=${TMP_FILENAME%.txt}"_termsuite.txt";
+  FULL_FILENAME=${TMP_FILENAME%.txt}"_termsuite.tsv";
   #assuming that there is an instalation of termsuite
-  cat $f | java -cp "$TERMSUITE_WORKSPACE/termsuite-core-2.1.jar" eu.project.ttc.tools.cli.TermSuiteTerminoCLI   -t $TERMSUITE_WORKSPACE/tree-tagger/  -l en -r $TERMSUITE_WORKSPACE/termsuite-resources.jar --json $FULL_FILENAME;
+  echo $f;
+  echo $FULL_FILENAME;
+  echo 
+  echo
+  cat $f | java -cp "$TERMSUITE_WORKSPACE/termsuite-core-2.1.jar" eu.project.ttc.tools.cli.TermSuiteTerminoCLI   -t $TERMSUITE_WORKSPACE/tree-tagger/  -l en -r $TERMSUITE_WORKSPACE/termsuite-resources.jar --tsv $FULL_FILENAME;
 done
