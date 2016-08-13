@@ -8,38 +8,80 @@ The texts must be in tsv format, the first column is the language id (i.e. en, f
 
 ## Resources 
 
-First [50 titles with accents](https://data.totum.one/resources/titles-accents.first50-msfag.txt)
+First [50 titles with accents](https://data.totum.one/resources/titles-accents.first50-msfag.txt), (all are in english).
 
-First [100 titles with accents](https://data.totum.one/resources/titles-accents.first100-msfag.txt)
+First [100 titles with accents](https://data.totum.one/resources/titles-accents.first100-msfag.txt), (all are in english).
 
-First [200 titles with accents](https://data.totum.one/resources/titles-accents.first200-msfag.txt)
+First [200 titles with accents](https://data.totum.one/resources/titles-accents.first200-msfag.txt).
 
-First [200 titles](https://data.totum.one/resources/titles.first200-msfag.txt)
+First [200 titles](https://data.totum.one/resources/titles.first200-msfag.txt).
 
 ## Results 
 
 ```
+$ python english-identification-short-texts.py titles-accents.first50-msfag.txt 
+Python lib: guess_language
+Precision:    1.0000
+Recall:       1.0000
+f1:           1.0000
+
+Python lib: langdetect
+Precision:    1.0000
+Recall:       0.9600
+f1:           0.9796
+
+Python lib: textcat
+Precision:    1.0000
+Recall:       0.5800
+f1:           0.7342
+
+Python lib: langid
+Precision:    1.0000
+Recall:       0.7400
+f1:           0.8506
+```
+
+```
+$ python english-identification-short-texts.py titles-accents.first100-msfag.txt 
+Python lib: guess_language
+Precision:    1.0000
+Recall:       0.9600
+f1:           0.9796
+
+Python lib: langdetect
+Precision:    1.0000
+Recall:       0.9600
+f1:           0.9796
+
+Python lib: textcat
+Precision:    1.0000
+Recall:       0.4500
+f1:           0.6207
+
+Python lib: langid
+Precision:    1.0000
+Recall:       0.7600
+f1:           0.8636
+```
+
+```
 $ python english-identification-short-texts.py titles-accents.first200-msfag.txt 
-Method name:  guess_language
-Accuracy:     0.9650
+Python lib:  guess_language
 Precision:    0.9843
 Recall:       0.9615
 f1:           0.9728
 
-Method name:  langdetect
-Accuracy:     0.9700
+Python lib:  langdetect
 Precision:    1.0000
 Recall:       0.9538
 f1:           0.9764
 
-Method name:  textcat
-Accuracy:     0.6800
+Python lib:  textcat
 Precision:    1.0000
 Recall:       0.5077
 f1:           0.6735
 
-Method name:  langid
-Accuracy:     0.8400
+Python lib:  langid
 Precision:    1.0000
 Recall:       0.7538
 f1:           0.8596
@@ -48,28 +90,23 @@ f1:           0.8596
 ```
 $ python english-identification-short-texts.py titles.first200-msfag.txt 
 
-Method name:  guess_language
-Accuracy:     0.9850
+Python lib:  guess_language
 Precision:    1.0000
 Recall:       0.9850
 f1:           0.9924
 
-Method name:  langdetect
-Accuracy:     0.9750
+Python lib:  langdetect
 Precision:    1.0000
 Recall:       0.9750
 f1:           0.9873
 
-Method name:  textcat
-Accuracy:     0.8550
+Python lib:  textcat
 Precision:    1.0000
 Recall:       0.8550
 f1:           0.9218
 
-Method name:  langid
-Accuracy:     0.9750
+Python lib:  langid
 Precision:    1.0000
 Recall:       0.9750
 f1:           0.9873
-
 ```
