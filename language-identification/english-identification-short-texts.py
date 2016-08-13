@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import langid #https://github.com/saffsd/langid.py
 import langdetect #https://github.com/Mimino666/langdetect
@@ -51,7 +52,9 @@ def compare_english_identification(corpus):
             checking_answer("langdetect", relevant_language, text_lang, with_langdetect(text_decode), results)
             checking_answer("guess_language", relevant_language, text_lang, with_guess_language(text_decode), results)
             checking_answer("langid", relevant_language, text_lang, with_langid(text), results)
-            checking_answer("textcat", relevant_language, text_lang, with_textcat(text_decode), results) 
+            checking_answer("custom1", relevant_language, text_lang, with_custom1(text_decode), results)
+            checking_answer("custom2", relevant_language, text_lang, with_custom2(text_decode), results)
+            #checking_answer("textcat", relevant_language, text_lang, with_textcat(text_decode), results) 
         except UnicodeDecodeError as e:
             print >> sys.stderr, "UnicodeDecodeError ({0}): {1}".format(e.errno, e.strerror)
             return 
@@ -77,6 +80,20 @@ def with_textcat(text):
 def with_guess_language(text):
     guess_language_result = guess_language.guess_language(text)
     return guess_language_result
+
+def with_custom1(text):
+    if any(c in text.lower() for c in u"áàâäãåéèêëíìîïóòôöõúùûüçñýÿ"):
+        result_langi = guess_language.guess_language(text)
+    else:
+        result_langi = langid.classify(text)[0]
+    return result_langi
+
+def with_custom2(text):
+    if any(c in text.lower() for c in u"áàâäãåéèêëíìîïóòôöõúùûüçñýÿ"):
+        result_langi = langdetect.detect(text)
+    else:
+        result_langi = langid.classify(text)[0]
+    return result_langi
 
 if __name__ == "__main__":
     try:
