@@ -8,9 +8,9 @@ The texts must be in tsv format, the first column is the language id (i.e. en, f
 
 ## Resources 
 
-First [50 titles with accents](https://data.totum.one/resources/titles-accents.first50-msfag.txt), (all are in english).
+First [50 titles with accents](https://data.totum.one/resources/titles-accents.first50-msfag.txt) (all are in english).
 
-First [100 titles with accents](https://data.totum.one/resources/titles-accents.first100-msfag.txt), (all are in english).
+First [100 titles with accents](https://data.totum.one/resources/titles-accents.first100-msfag.txt) (all are in english).
 
 First [200 titles with accents](https://data.totum.one/resources/titles-accents.first200-msfag.txt).
 
