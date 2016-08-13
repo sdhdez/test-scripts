@@ -4,36 +4,36 @@ import langdetect #https://github.com/Mimino666/langdetect
 from nltk.classify import TextCat #http://www.nltk.org/api/nltk.classify.html
 import guess_language #https://bitbucket.org/spirit/guess_language
 
-def checking_answer(methodid, relevant_lang, text_lang, result_lang, results):
-    results.setdefault(methodid, {})
-    results[methodid].setdefault('tp', 0)
-    results[methodid].setdefault('fn', 0)
-    results[methodid].setdefault('fp', 0)
-    results[methodid].setdefault('tn', 0)
+def checking_answer(pythonlib_id, relevant_lang, text_lang, result_lang, results):
+    results.setdefault(pythonlib_id, {})
+    results[pythonlib_id].setdefault('tp', 0)
+    results[pythonlib_id].setdefault('fn', 0)
+    results[pythonlib_id].setdefault('fp', 0)
+    results[pythonlib_id].setdefault('tn', 0)
 
     if relevant_lang == text_lang:
         if text_lang == result_lang:
-            results[methodid]['tp'] += 1
+            results[pythonlib_id]['tp'] += 1
         else:
-            results[methodid]['fn'] += 1
+            results[pythonlib_id]['fn'] += 1
     else:
         if relevant_lang == result_lang:
-            results[methodid]['fp'] += 1
+            results[pythonlib_id]['fp'] += 1
         else:
-            results[methodid]['tn'] += 1
+            results[pythonlib_id]['tn'] += 1
 
 def evaluate(results):
-    for method in results.items():
-        tp = method[1]['tp']
-        tn = method[1]['tn']
-        fp = method[1]['fp']
-        fn = method[1]['fn']
-        accuracy = (tp + tn)/float(tp + tn + fp + fn)
+    for pythonlib in results.items():
+        tp = pythonlib[1]['tp']
+        tn = pythonlib[1]['tn']
+        fp = pythonlib[1]['fp']
+        fn = pythonlib[1]['fn']
+        #accuracy = (tp + tn)/float(tp + tn + fp + fn)
         precision = tp/float(tp + fp)
         recall = tp/float(tp + fn)
         f1 = 2 * (precision*recall)/(precision + recall)
-        print "Method name:\t", method[0]
-        print "Accuracy:   \t{0:.4f}".format(accuracy)
+        print "Python lib: \t", pythonlib[0]
+        #print "Accuracy:   \t{0:.4f}".format(accuracy)
         print "Precision:  \t{0:.4f}".format(precision)
         print "Recall:     \t{0:.4f}".format(recall)
         print "f1:         \t{0:.4f}".format(f1)
