@@ -17,40 +17,6 @@ First [200 titles with accents](https://data.totum.one/resources/titles-accents.
 ## Results 
 
 ```
-$ python english-identification-short-texts.py titles-accents.first200-msfag.txt 
-Python lib:  guess_language
-Precision:    0.9843
-Recall:       0.9615
-f1:           0.9728
-
-Python lib:  langdetect
-Precision:    1.0000
-Recall:       0.9538
-f1:           0.9764
-
-Python lib:  textcat
-Precision:    1.0000
-Recall:       0.5077
-f1:           0.6735
-
-Python lib:  langid
-Precision:    1.0000
-Recall:       0.7538
-f1:           0.8596
-
-Python lib: 	custom1
-Precision:  	0.9843
-Recall:     	0.9615
-f1:         	0.9728
-
-Python lib: 	custom2
-Precision:  	1.0000
-Recall:     	0.9538
-f1:         	0.9764
-
-```
-
-```
 $ python english-identification-short-texts.py titles.first200-msfag.txt 
 
 Python lib:  guess_language
@@ -116,5 +82,39 @@ Python lib: 	custom2
 Precision:  	0.9231
 Recall:     	0.9333
 f1:         	0.9282
+
+```
+
+```
+$ python english-identification-short-texts.py titles-accents.first200-msfag.txt 
+Python lib:  guess_language
+Precision:    0.9843
+Recall:       0.9615
+f1:           0.9728
+
+Python lib:  langdetect
+Precision:    1.0000
+Recall:       0.9538
+f1:           0.9764
+
+Python lib:  textcat
+Precision:    1.0000
+Recall:       0.5077
+f1:           0.6735
+
+Python lib:  langid
+Precision:    1.0000
+Recall:       0.7538
+f1:           0.8596
+
+Python lib: 	custom1
+Precision:  	0.9843
+Recall:     	0.9615
+f1:         	0.9728
+
+Python lib: 	custom2
+Precision:  	1.0000
+Recall:     	0.9538
+f1:         	0.9764
 
 ```
