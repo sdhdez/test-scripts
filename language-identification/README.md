@@ -110,3 +110,27 @@ Precision:    1.0000
 Recall:       0.9750
 f1:           0.9873
 ```
+
+```
+$ python english-identification-short-texts.py titles.others200-msfag.txt 
+Python lib: 	guess_language
+Precision:  	0.8969
+Recall:     	0.9667
+f1:         	0.9305
+
+Python lib: 	langdetect
+Precision:  	0.8854
+Recall:     	0.9444
+f1:         	0.9140
+
+Python lib: 	textcat
+Precision:  	0.8060
+Recall:     	0.6000
+f1:         	0.6879
+
+Python lib: 	langid
+Precision:  	0.9231
+Recall:     	0.9333
+f1:         	0.9282
+```
+
