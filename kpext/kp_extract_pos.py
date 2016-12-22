@@ -3,28 +3,7 @@ import sys
 import os
 from nltk.tokenize import TreebankWordTokenizer as Tokenizer
 from nltk.tag.perceptron import PerceptronTagger
-
-def pos_text(text):
-    try:
-        tokenizer = Tokenizer()
-        #pos
-        tagger = PerceptronTagger()
-        tokens = tokenizer.tokenize(text)
-        tagged_tokens = [(token[0], token[1]) for token in tagger.tag(tokens)]
-        #span 
-        offset = 0
-        tagged_tokens_index = []
-        for tt in tagged_tokens:
-            start = offset + text[offset:].find(tt[0])
-            end_token = start + len(tt[0])
-            if text[start:end_token] != tt[0]:
-                print >> sys.stderr, "Different."
-                raise 
-            tagged_tokens_index.append((start, end_token, tt[0], tt[1]))
-            offset = end_token
-        return tagged_tokens_index 
-    except:
-        print >> sys.stderr, "Error: ", sys.exc_info()
+import operator
 
 if __name__ == "__main__":
     try:
@@ -44,9 +23,8 @@ if __name__ == "__main__":
                     file_ann_ext = os.path.join(dir_output, f[:-3] + "anne")
                     ann_ext_file = open(file_ann_ext, "w")
 
-                    print "Starting ..."
                     print f[:-4]
-                    indexes_kp = []
+                    indexes_kp_tmp = {}
                     for ann in ann_file:
                         ann = unicode(ann, encoding="utf-8")
                         if ann[0] not in ["R", "*"]:
@@ -58,12 +36,13 @@ if __name__ == "__main__":
                                 type_indexes = ann_items[1].split(" ")
                             type_indexes[1] = int(type_indexes[1])
                             type_indexes[2] = int(type_indexes[2])
-                            indexes_kp.append((type_indexes[1], type_indexes[2]))
+                            indexes_kp_tmp.setdefault(type_indexes[1], -1)
+                            if indexes_kp_tmp[type_indexes[1]] < type_indexes[2]:
+                                indexes_kp_tmp[type_indexes[1]] = type_indexes[2]
                             ann_text = ann_items[2]
                             tokens = tokenizer.tokenize(ann_text)
                             pos_tags = " ".join([pos[1] for pos in tagger.tag(tokens)])
                             ann_text = ann_text.encode("utf-8")
-                            print ann_text, pos_tags
                             print >> ann_ext_file, " ".join([str(ti) for ti in type_indexes]) + "\t" + ann_text + "\t" + pos_tags
                     ann_file.close()
                     ann_ext_file.close()
@@ -74,15 +53,42 @@ if __name__ == "__main__":
                     nokp_file = open(file_nokp, "w")
 
                     raw_text = unicode(text_file.read(), encoding="utf-8")
-                    print raw_text
+
+                    indexes_kp_tmp = sorted(indexes_kp_tmp.items(), key=operator.itemgetter(0,1))
+                    indexes_kp = []
+                    ikp_tmp = (-1, -1)
+                    for ikp in indexes_kp_tmp:
+                        if ikp_tmp[1] >= ikp[0]:
+                            ikp_tmp = (ikp_tmp[0], max([ikp_tmp[1], ikp[1]]))
+                            print "Overlap --- ", ikp_tmp
+                        indexes_kp.append(ikp_tmp)
+                        ikp_tmp = ikp
+
+                    if ikp_tmp[0] > indexes_kp[len(indexes_kp) - 1][1]:
+                        indexes_kp.append(ikp_tmp)
+                    else:
+                        print "Overlap at the end --- ", ikp_tmp
+                    indexes_kp.pop(0) #removes (-1, -1)
+
                     i = 0
                     for start, end in indexes_kp:
+                        if start == 0:
+                            i = end
+                            continue
                         not_kp_text = raw_text[i:start]
                         not_kp_tokens = tokenizer.tokenize(not_kp_text)
                         pos_tags = " ".join([pos[1] for pos in tagger.tag(not_kp_tokens)])
                         not_kp_text = not_kp_text.encode("utf-8")
                         print >> nokp_file, i, str(start) + "\t" + not_kp_text + "\t" + pos_tags
-                        i = end + 1 
+                        i = end
+                    len_raw_text = len(raw_text)
+                    if end < len_raw_text:
+                        not_kp_text = raw_text[end:len_raw_text].strip("\n")
+                        not_kp_tokens = tokenizer.tokenize(not_kp_text)
+                        pos_tags = " ".join([pos[1] for pos in tagger.tag(not_kp_tokens)])
+                        not_kp_text = not_kp_text.encode("utf-8")
+                        print >> nokp_file, end, str(len_raw_text) + "\t" + not_kp_text + "\t" + pos_tags
+                       
                     text_file.close()
                     nokp_file.close()
 
