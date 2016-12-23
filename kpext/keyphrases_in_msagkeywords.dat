@@ -1,0 +1,6 @@
+#type precision recall f1-score keyphrases
+TrainExact 1.00 0.15 0.26 6721
+TrainSubstring 1.00 0.24 0.39 6721
+DevExact 1.00 0.19 0.32 1154
+DevSubstring 1.00 0.31 0.47 1154
+
