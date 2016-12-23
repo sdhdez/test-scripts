@@ -17,14 +17,13 @@ if __name__ == "__main__":
                     file_kpe = os.path.join(dir_output, f[:-3] + "ann")
                     kpe_file = open(file_kpe, "w")
 
-                    print "Starting ..."
                     print f[:-4]
                     for ann in ann_file:
                         if ann[0] not in ["R", "*"]:
                             ann_items = ann.strip().split("\t")
                             ann_text = unicode(ann_items[2], encoding="utf-8")
                             #search kp
-                            query_r = qr.is_keyword(ann_text, regex = None)
+                            query_r = qr.is_keyword(ann_text, exact = True)
                             if query_r:
                                 print >> kpe_file, ann,
                     ann_file.close()
