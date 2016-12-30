@@ -1,10 +1,10 @@
 reset # do not use any previous settings
-set title "Keyphrase extraction - Projection of POS sequences over the development data" # title
+set title "F1 score - Keyphrase extraction - Projection of POS sequences over the development data" # title
 set xlabel "Min ocurrence of each POS sequence" # x-axis label
 set ylabel "F1 score" # y-axis label
-set term png size 800, 400 font "Helvetica" 10
+set term png size 800, 400 font "Helvetica" 9
 set size ratio 0.4 #plot dimensions
-set output "f1score.png" # name of image file 
+set output "plot_f1score_projection_pos_seq_count.png" # name of image file 
 set grid y
 set xtics rotate
 set ytics 0.01

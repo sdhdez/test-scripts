@@ -1,10 +1,10 @@
 reset # do not use any previous settings
-set title "Keyphrase extraction - Projection of POS sequences over the development data" # title
+set title "Recall - Keyphrase extraction - Projection of POS sequences over the development data" # title
 set xlabel "Min ocurrence of each POS sequence" # x-axis label
 set ylabel "Recall" # y-axis label
 set term png size 800, 400 font "Helvetica" 10
 set size ratio 0.4 #plot dimensions
-set output "recall.png" # name of image file 
+set output "plot_recall_projection_pos_seq_count.png" # name of image file 
 set grid y
 set xtics rotate
 set ytics 0.1
