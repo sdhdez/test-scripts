@@ -13,30 +13,41 @@ def reset_kp_search():
 
 if __name__ == "__main__":
     try:
+        debug = True if sys.argv[-1] == "debug" else False
+        debug_tests = 1
+        file_count = 0
+
         dir_corpus = sys.argv[1]
         dir_output = sys.argv[2]
 
         try:
             common_tags = sys.argv[3]
+            count_limit = int(sys.argv[4])
             tags_file = open(common_tags, "r")
             common_tags = []
             for ct in tags_file:
-                common_tags.append([t for t in ct.strip().split("\t")])
+                ct_fields = ct.strip().split("\t")
+                if int(ct_fields[1]) < count_limit:
+                    continue
+                if debug:
+                    print ct_fields
+                common_tags.append([t for t in ct_fields])
         except:
             print >> sys.stderr, "E) Common tags: ", sys.exc_info()
-
-        debug = True if sys.argv[-1] == "debug" else False
 
         qr = mdbcl.QueryResources()
         tokenizer = Tokenizer()
         tagger = PerceptronTagger()
 
-        file_count = 0
         for (dirname, _, filenames) in os.walk(dir_corpus):
             for f in filenames:
                 ext = f[-3:]
                 if ext == 'txt':
-                    file_count += 1
+
+                    file_count += 1 #debug
+                    if debug and file_count > debug_tests: #debug
+                        break #debug
+
                     print file_count, f[:-4]
                     try:
                         file_text = os.path.join(dirname, f[:-3] + "txt")
