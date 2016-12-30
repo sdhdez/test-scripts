@@ -5,7 +5,7 @@ OUTPUT_DIR=$2;
 POS_TAGS_FILE=$3;
 
 EVAL_SCRIPT=$4;
-EVAL_RESULTS_FILE="kp_seq_projection_filter_by_count.dat";
+EVAL_RESULTS_FILE="evaluation_results_tmp.dat";
 
 
 if [ ! -d $OUTPUT_DIR ]
@@ -19,7 +19,7 @@ then
     exit;
 fi
 
-echo "#ge1 precision recall f1score" >> $EVAL_RESULTS_FILE;
+echo "#FilterMinCount precision recall f1score" >> $EVAL_RESULTS_FILE;
 
 tmp_last_count="";
 while read pos_seq_id pos_seq_count pos_tags
