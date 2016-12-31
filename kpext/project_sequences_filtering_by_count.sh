@@ -19,13 +19,15 @@ then
     exit;
 fi
 
-echo "#FilterMinCount precision recall f1score" >> $EVAL_RESULTS_FILE;
+echo "#Id FilterMinCount precision recall f1score" >> $EVAL_RESULTS_FILE;
 
 tmp_last_count="";
+current_index=0;
 while read pos_seq_id pos_seq_count pos_tags
 do
     if [[ $tmp_last_count != $pos_seq_count ]]
-    then 
+    then
+        ((current_index++));
         FULL_NEW_PATH=$OUTPUT_DIR"pos_seq_count_gt"$pos_seq_count;
         if [ ! -d $FULL_NEW_PATH ]
         then
@@ -36,7 +38,7 @@ do
         then
             python kp_seq_projection.py $TEST_DIR $FULL_NEW_PATH $POS_TAGS_FILE $pos_seq_count;
             read foo precision recall f1score total < <(python $EVAL_SCRIPT $TEST_DIR $FULL_NEW_PATH types | grep "KEYPHRASE");
-            echo $pos_seq_count $precision $recall $f1score >> $EVAL_RESULTS_FILE;
+            echo $current_index $pos_seq_count $precision $recall $f1score >> $EVAL_RESULTS_FILE;
         fi
     fi
     tmp_last_count=$pos_seq_count;
