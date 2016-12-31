@@ -38,7 +38,7 @@ if __name__ == "__main__":
                 main_seq = re.sub(pos_general_regex, r"(\g<2>)+", escaped_main_seq)
                 sequences.setdefault(main_seq, 0)
                 sequences[main_seq] += tmp_sum_seq_ocurrences
-            print "\n".join(["POSREGEX" + str(i) + " " + str(s[1]) + "\t" + s[0] 
+            print "\n".join(["POSREGEX" + str(i) + "\t" + str(s[1]) + "\t" + s[0] 
                 for i, s in enumerate(sorted(sequences.items(), key=operator.itemgetter(1)), start=1)])
         except:
             print >> sys.stderr, "E) Sequences: ", sys.exc_info()
