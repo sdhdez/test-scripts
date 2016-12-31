@@ -16,6 +16,7 @@ if __name__ == "__main__":
         debug = True if sys.argv[-1] == "debug" else False
         debug_tests = 1
         file_count = 0
+        is_posregex = False
 
         dir_corpus = sys.argv[1]
         dir_output = sys.argv[2]
@@ -27,11 +28,15 @@ if __name__ == "__main__":
             common_tags = []
             for ct in tags_file:
                 ct_fields = ct.strip().split("\t")
+                if not is_posregex and "POSREGEX" == ct_fields[0][:8]:
+                    is_posregex = True
                 if int(ct_fields[1]) < count_limit:
                     continue
+                common_tags.append([t for t in ct_fields])
+                continue
                 if debug:
                     print ct_fields
-                common_tags.append([t for t in ct_fields])
+
         except:
             print >> sys.stderr, "E) Common tags: ", sys.exc_info()
 
@@ -68,36 +73,41 @@ if __name__ == "__main__":
                     pos_tags_string = " ".join([pt[1] for pt in pos_tags])
                     #print "\n".join([str(ptstr) for ptstr in pos_tags])
                     kps_candidates = {}
+                    test_match = 0
                     for ct in common_tags:
-                        if ct[2] in pos_tags_string:
-                            tags = ct[2].split(" ")
-                            t_index = 0
-                            n_tags = len(tags)
-                            start = False
-                            keyphrase = []
-                            for pt in pos_tags:
-                                if kpcommon.is_pos_error(pt[0], pt[1]):
-                                    keyphrase, t_index, start = reset_kp_search()
-                                    continue
-                                if n_tags > t_index:
-                                    if pt[1] == tags[t_index] and not start:
-                                        start = True
-                                        t_index += 1
-                                        keyphrase.append(pt[0])
-                                        #print start, pt, t_index, n_tags, tags
-                                        continue 
-                                    if start and pt[1] == tags[t_index]:
-                                        keyphrase.append(pt[0])
-                                        t_index += 1
-                                    elif start and pt[1] != tags[t_index]:
-                                        keyphrase, t_index, start = reset_kp_search()
-                                    continue 
-                                if start:
-                                    final_kp = " ".join(keyphrase)
-                                    kps_candidates.setdefault(final_kp, [0, set()])
-                                    kps_candidates[final_kp][0] += 1 
-                                    kps_candidates[final_kp][1].add(str(ct))
-                                    keyphrase, t_index, start = reset_kp_search()
+                        if is_posregex:
+                            pos_regex = re.compile("\W?(" + ct[2] + ")\W")
+                        else:
+                            pos_regex = re.compile("\W?(" + re.escape(ct[2]) + ")\W")
+                        for pos_match in re.finditer(pos_regex, pos_tags_string):
+                            pos_match_string = pos_match.group(1)
+                            pos_seq_start = pos_match.start(1)
+                            pos_seq_end = pos_match.end(1)
+                            token_index_start = len(pos_tags_string[:pos_seq_start].split())
+                            token_offset = len(pos_tags_string[pos_seq_start:pos_seq_end].split())
+                            token_index_end = token_index_start + token_offset
+                            real_pos_seq =  " ".join([pos_i for tok_i, pos_i in pos_tags[token_index_start:token_index_end]])
+                            real_token_seq =  " ".join([tok_i for tok_i, pos_i in pos_tags[token_index_start:token_index_end]])
+                            if False and debug:
+                                print pos_seq_start, pos_seq_end, token_index_start, token_offset, 
+                                print pos_tags[token_index_start:token_index_end]
+                                print pos_match_string == pos_tags_string[pos_seq_start:pos_seq_end], 
+                                print pos_match_string == real_pos_seq, real_pos_seq, 
+                                print real_token_seq
+                            if pos_match_string == real_pos_seq:
+                                is_pos_valid = True
+                                for pt in pos_tags[token_index_start:token_index_end]:
+                                    if kpcommon.is_pos_error(pt[0], pt[1]):
+                                        is_pos_valid = False
+                                        break
+                                if is_pos_valid:
+                                    test_match += 1
+                                    kps_candidates.setdefault(real_token_seq, [0, set()])
+                                    kps_candidates[real_token_seq][0] += 1 
+                                    kps_candidates[real_token_seq][1].add(str(ct))
+                    if debug:
+                        print >> sys.stderr, "-- Match:", test_match
+
                     #print kps_candidates, len(kps_candidates)
                     if debug:
                         print "\n".join([str(c) for c in kps_candidates.items()]), len(kps_candidates)
@@ -105,7 +115,7 @@ if __name__ == "__main__":
                     tmp_kps_candidates = []
                     for kp in kps_candidates.keys():
                         """
-                        query_r = qr.is_keyword(kp, exact = False)
+                        query_r = qr.is_keyword(kp, exact = True)
                         if not query_r:
                             continue
                         """
@@ -120,7 +130,8 @@ if __name__ == "__main__":
                             tmp_kps_candidates.append((start, end, m.span(1), kp, raw_text[start:end]))
                     kps_candidates = sorted(tmp_kps_candidates, key=lambda tup: tup[0])
                     if debug:
-                        print "\n".join([str(c) for c in kps_candidates]), len(kps_candidates)
+                        print "\n".join([str(c) for c in kps_candidates])
+                        print "Candidates:", len(kps_candidates)
                     text_file.close()
                     kpe_file.close()
                 else:
