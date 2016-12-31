@@ -88,7 +88,7 @@ if __name__ == "__main__":
                             token_index_end = token_index_start + token_offset
                             real_pos_seq =  " ".join([pos_i for tok_i, pos_i in pos_tags[token_index_start:token_index_end]])
                             real_token_seq =  " ".join([tok_i for tok_i, pos_i in pos_tags[token_index_start:token_index_end]])
-                            if False and debug:
+                            if debug:
                                 print pos_seq_start, pos_seq_end, token_index_start, token_offset, 
                                 print pos_tags[token_index_start:token_index_end]
                                 print pos_match_string == pos_tags_string[pos_seq_start:pos_seq_end], 
@@ -114,11 +114,9 @@ if __name__ == "__main__":
                     i = 0
                     tmp_kps_candidates = []
                     for kp in kps_candidates.keys():
-                        """
-                        query_r = qr.is_keyword(kp, exact = True)
+                        query_r = qr.is_keyword(kp, exact = False)
                         if not query_r:
                             continue
-                        """
                         for m in re.finditer("\W?(" + re.escape(kp) + ")\W", raw_text):
                             #m = re.search(re.escape(term[2]), text)
                             start = m.start(1)
