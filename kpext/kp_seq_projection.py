@@ -8,6 +8,10 @@ import nltk.data
 import re
 import kpcommon
 
+from nltk.stem import WordNetLemmatizer
+from nltk.stem.lancaster import LancasterStemmer
+from nltk.corpus import stopwords
+
 def reset_kp_search():
     return [], 0, False 
 
@@ -43,6 +47,8 @@ if __name__ == "__main__":
         qr = mdbcl.QueryResources()
         tokenizer = Tokenizer()
         tagger = PerceptronTagger()
+        lemmatizer = WordNetLemmatizer()
+        stemmer = LancasterStemmer()
 
         for (dirname, _, filenames) in os.walk(dir_corpus):
             for f in filenames:
@@ -114,9 +120,23 @@ if __name__ == "__main__":
                     i = 0
                     tmp_kps_candidates = []
                     for kp in kps_candidates.keys():
-                        query_r = qr.is_keyword(kp, exact = False)
+                        kp_tokens = [t for t in tokenizer.tokenize(kp) if t not in stopwords.words('english')]
+                        #lemma_keywords_str = " ".join([lemmatizer.lemmatize(kp_token) for kp_token in kp_tokens])
+                        stem_keywords_str = " ".join([stemmer.stem(kp_token) for kp_token in kp_tokens])
+                        query_r = qr.is_keyword(stem_keywords_str, exact = True)
                         if not query_r:
                             continue
+
+                        """
+                        query_r = qr.is_keyword(kp, exact = True)
+                        if not query_r:
+                            continue
+                        """
+                        """
+                        query_r = qr.is_keyword(kp, exact = True, of_interest = False)
+                        if query_r:
+                            continue
+                        """
                         for m in re.finditer("\W?(" + re.escape(kp) + ")\W", raw_text):
                             #m = re.search(re.escape(term[2]), text)
                             start = m.start(1)
