@@ -12,35 +12,22 @@ from nltk.stem import WordNetLemmatizer
 from nltk.stem.lancaster import LancasterStemmer
 from nltk.corpus import stopwords
 
-def reset_kp_search():
-    return [], 0, False 
-
 if __name__ == "__main__":
     try:
         debug = True if sys.argv[-1] == "debug" else False
         debug_tests = 1
         file_count = 0
-        is_posregex = False
-
-        dir_corpus = sys.argv[1]
-        dir_output = sys.argv[2]
 
         try:
-            common_tags = sys.argv[3]
-            count_limit = int(sys.argv[4])
-            tags_file = open(common_tags, "r")
-            common_tags = []
-            for ct in tags_file:
-                ct_fields = ct.strip().split("\t")
-                if not is_posregex and "POSREGEX" == ct_fields[0][:8]:
-                    is_posregex = True
-                if int(ct_fields[1]) < count_limit:
-                    continue
-                common_tags.append([t for t in ct_fields])
-                continue
-                if debug:
-                    print ct_fields
+            dir_corpus = sys.argv[1]
+            dir_output = sys.argv[2]
+        except:
+            print >> sys.stderr, "E) Directories: ", sys.exc_info()
 
+        try:
+            pos_sequences_filename = sys.argv[3]
+            count_limit = int(sys.argv[4])
+            pos_sequences, is_posregex = kpcommon.get_pos_tags_by_count(pos_sequences_filename, count_limit)
         except:
             print >> sys.stderr, "E) Common tags: ", sys.exc_info()
 
@@ -49,22 +36,19 @@ if __name__ == "__main__":
         tagger = PerceptronTagger()
         lemmatizer = WordNetLemmatizer()
         stemmer = LancasterStemmer()
-
+        
         for (dirname, _, filenames) in os.walk(dir_corpus):
             for f in filenames:
                 ext = f[-3:]
                 if ext == 'txt':
-
                     file_count += 1 #debug
                     if debug and file_count > debug_tests: #debug
                         break #debug
-
                     print file_count, f[:-4]
                     try:
                         file_text = os.path.join(dirname, f[:-3] + "txt")
                         text_file = open(file_text, "r")
                         raw_text = unicode(text_file.read(), encoding="utf-8")
-
                         file_kpe = os.path.join(dir_output, f[:-3] + "ann")
                         kpe_file = open(file_kpe, "w")
                     except:
@@ -80,7 +64,7 @@ if __name__ == "__main__":
                     #print "\n".join([str(ptstr) for ptstr in pos_tags])
                     kps_candidates = {}
                     test_match = 0
-                    for ct in common_tags:
+                    for ct in pos_sequences:
                         if is_posregex:
                             pos_regex = re.compile("\W?(" + ct[2] + ")\W")
                         else:
@@ -120,13 +104,14 @@ if __name__ == "__main__":
                     i = 0
                     tmp_kps_candidates = []
                     for kp in kps_candidates.keys():
+                        """
                         kp_tokens = [t for t in tokenizer.tokenize(kp) if t not in stopwords.words('english')]
-                        #lemma_keywords_str = " ".join([lemmatizer.lemmatize(kp_token) for kp_token in kp_tokens])
+                        lemma_keywords_str = " ".join([lemmatizer.lemmatize(kp_token) for kp_token in kp_tokens])
                         stem_keywords_str = " ".join([stemmer.stem(kp_token) for kp_token in kp_tokens])
-                        query_r = qr.is_keyword(stem_keywords_str, exact = True)
+                        query_r = qr.is_keyword(stem_keywords_str, exact = True, not_by_keyword = 'stem')
                         if not query_r:
                             continue
-
+                        """
                         """
                         query_r = qr.is_keyword(kp, exact = True)
                         if not query_r:

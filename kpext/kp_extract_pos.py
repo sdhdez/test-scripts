@@ -22,7 +22,6 @@ if __name__ == "__main__":
                     ann_file = open(file_ann, "r")
                     file_ann_ext = os.path.join(dir_output, f[:-3] + "anne")
                     ann_ext_file = open(file_ann_ext, "w")
-
                     print f[:-4]
                     indexes_kp_tmp = {}
                     for ann in ann_file:
