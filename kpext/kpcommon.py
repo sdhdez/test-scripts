@@ -1,4 +1,7 @@
 import sys 
+import os
+import math
+from nltk.tokenize import TreebankWordTokenizer as Tokenizer
 
 POS_OBVIOUS_ERRORS = {
     '[': ['NN', 'NNS', 'NNP'],
@@ -48,3 +51,75 @@ def print_to_ann(output_stream, _id, type_indexes, kpstr, return_string = False)
         print >> output_stream, ann_str
     else:
         return ann_str
+
+def get_document_content(dirname, filename, extensions = None):
+    full_text = []
+    if not extensions:
+        try:
+            path_filename = os.path.join(dirname, filename)
+            stream_input = open(path_filename, "r")
+            for line in stream_input:
+                full_text.append(unicode(line.strip(), encoding="utf-8"))
+            stream_input.close()
+        except:
+            print >> sys.stderr, "E) Single file: ", path_filename, sys.exc_info()            
+    else:
+        try:
+            for ext in extensions:
+                path_filename = os.path.join(dirname, filename + ext)
+                stream_input = open(path_filename, "r")
+                for line in stream_input:
+                    full_text.append(unicode(line.strip(), encoding="utf-8"))
+                stream_input.close()
+        except:
+            print >> sys.stderr, "E) Multiple file extensions: ", path_filename, sys.exc_info()
+    return full_text
+
+def get_document_content_ann(dirname, filename):
+    full_text = []
+    try:
+        path_filename = os.path.join(dirname, filename)
+        stream_input = open(path_filename, "r")
+        for line in stream_input:
+            full_text.append(unicode(line.strip(), encoding="utf-8").split("\t"))
+        stream_input.close()
+    except:
+        print >> sys.stderr, "E) Single file: ", path_filename, sys.exc_info()            
+    return full_text
+
+def tf_normalized(full_texts):
+    tokenizer = Tokenizer()
+    tf = {}
+    max_value = 0
+    for text in full_texts:
+        text_tokens = tokenizer.tokenize(text)
+        text_tokens = escape_not_abbreviations(text_tokens)
+        for token in text_tokens:
+            token = token.lower()
+            tf.setdefault(token, 0.0)
+            tf[token] += 1.0
+            if tf[token] > max_value:
+                max_value = tf[token]
+    for t in tf:
+        tf[t] = tf[t]/max_value
+    return tf
+
+def idf(V, D, N):
+    _idf = {}
+    for t in V:
+        for d in D:
+            if t in D[d]:
+                _idf.setdefault(t, 0.0)
+                _idf[t] += 1.0
+    for t in _idf:
+        _idf[t] = math.log(N/(1.0 + _idf[t]))
+    return math.log(N), _idf
+
+
+def tf_idf(D, t_idf):
+    for d in D:
+        for t in D[d]:
+            _tf = D[d][t]
+            _idf = t_idf[t]
+            D[d][t] = _tf * _idf
+    return D
