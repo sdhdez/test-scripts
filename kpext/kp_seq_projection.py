@@ -66,9 +66,9 @@ if __name__ == "__main__":
                     test_match = 0
                     for ct in pos_sequences:
                         if is_posregex:
-                            pos_regex = re.compile("\W?(" + ct[2] + ")\W")
+                            pos_regex = re.compile("\s?(" + ct[2] + ")\s")
                         else:
-                            pos_regex = re.compile("\W?(" + re.escape(ct[2]) + ")\W")
+                            pos_regex = re.compile("\s?(" + re.escape(ct[2]) + ")\s")
                         for pos_match in re.finditer(pos_regex, pos_tags_string):
                             pos_match_string = pos_match.group(1)
                             pos_seq_start = pos_match.start(1)
