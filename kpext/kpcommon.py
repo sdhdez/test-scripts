@@ -81,7 +81,8 @@ def get_document_content_ann(dirname, filename):
         path_filename = os.path.join(dirname, filename)
         stream_input = open(path_filename, "r")
         for line in stream_input:
-            full_text.append(unicode(line.strip(), encoding="utf-8").split("\t"))
+            if line[0] not in ["R", "*"]:
+                full_text.append(unicode(line.strip(), encoding="utf-8").split("\t"))
         stream_input.close()
     except:
         print >> sys.stderr, "E) Single file: ", path_filename, sys.exc_info()            
@@ -115,11 +116,25 @@ def idf(V, D, N):
         _idf[t] = math.log(N/(1.0 + _idf[t]))
     return math.log(N), _idf
 
-
 def tf_idf(D, t_idf):
+    result = {}
     for d in D:
+        result.setdefault(d, {})
         for t in D[d]:
             _tf = D[d][t]
             _idf = t_idf[t]
-            D[d][t] = _tf * _idf
-    return D
+            result[d][t] = _tf * _idf
+    return result
+
+def norm(V):
+    S_x = 0.0
+    for x in V:
+        S_x += math.pow(V[x], 2)
+    return math.sqrt(S_x)
+
+def v1_dot_v2(V1, V2):
+    S_v1v2 = 0.0
+    for v1 in V1:
+        if v1 in V2:
+            S_v1v2 += V1[v1]*V2[v1]
+    return S_v1v2

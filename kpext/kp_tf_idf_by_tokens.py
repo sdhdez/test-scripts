@@ -73,9 +73,6 @@ if __name__ == "__main__":
                     keyphrase_extractions = []
                     tf_idf_kps = {}
                     for cur_kp in ann_content:
-                        if cur_kp[0][0] in ["R", "*"]:
-                            continue
-                        print cur_kp
                         if cur_kp[2] in tf_idf_kps:
                             norm_2 = tf_idf_kps[cur_kp[2]]
                         else:
@@ -105,8 +102,6 @@ if __name__ == "__main__":
                 else:
                     continue
 
-
-    
     except:
         print >> sys.stderr
         print >> sys.stderr, "usage: python", sys.argv[0], "<corpus_dir_path> <output_dir_path>"
