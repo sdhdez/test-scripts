@@ -1,3 +1,4 @@
+#Id FilterMinCount precision recall f1score
 1 1 0.06 0.25 0.09
 2 2 0.08 0.25 0.12
 3 3 0.09 0.25 0.13
