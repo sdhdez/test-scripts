@@ -90,28 +90,29 @@ if __name__ == "__main__":
                         test_kp = cur_kp[2].split(" ")
                         D["test_kp"] = kpc.tf_normalized(test_kp)
                         _V = _V.union(D["test_kp"].keys()) 
-                        tf_idf_0, t_idf = kpc.idf(_V, D, N)
+                        t_idf = kpc.idf(_V, D, N)
                         tf_idf = kpc.tf_idf(D, t_idf)
-                        Vtest_norm_2 = kpc.norm(D["test_kp"])
+                        Vtest_norm_2 = kpc.norm(tf_idf["test_kp"])
+                        print tf_idf["test_kp"]
                         tf_idf_kps[cur_kp[2]] = Vtest_norm_2
 
-                        similarity[process_class] = kpc.v1_dot_v2(D["test_kp"], D[process_class])/(Vtest_norm_2*V_norm_2[process_class])
-                        similarity[task_class] = kpc.v1_dot_v2(D["test_kp"], D[task_class])/(Vtest_norm_2*V_norm_2[task_class])
-                        similarity[material_class] = kpc.v1_dot_v2(D["test_kp"], D[material_class])/(Vtest_norm_2*V_norm_2[material_class])
-                        similarity[none_class] = kpc.v1_dot_v2(D["test_kp"], D[none_class])/(Vtest_norm_2*V_norm_2[none_class])
+                        similarity[process_class] = kpc.v1_dot_v2(tf_idf["test_kp"], tf_idf[process_class])/(Vtest_norm_2*V_norm_2[process_class])
+                        similarity[task_class] = kpc.v1_dot_v2(tf_idf["test_kp"], tf_idf[task_class])/(Vtest_norm_2*V_norm_2[task_class])
+                        similarity[material_class] = kpc.v1_dot_v2(tf_idf["test_kp"], tf_idf[material_class])/(Vtest_norm_2*V_norm_2[material_class])
+                        similarity[none_class] = kpc.v1_dot_v2(tf_idf["test_kp"], tf_idf[none_class])/(Vtest_norm_2*V_norm_2[none_class])
                         kp_type = max(similarity.items(), key=operator.itemgetter(1))
-                        print cur_kp[2], kp_type
-                        if kp_type[0] != none_class and kp_type[1] > 0.0:
+                        print cur_kp[2], kp_type, Vtest_norm_2
+                        if kp_type[0] != none_class and kp_type[1] > 0.1:
                             #kpe_string = "\t".join( cur_kp[0:1] + [" ".join([kp_type[0]] + cur_kp[1].split(" ")[1:])] + cur_kp[2:])
                             #print >> stream_output, kpe_string.encode("utf-8")
                             keyphrase_extractions.append([cur_kp[0:1] + [" ".join([kp_type[0]] + cur_kp[1].split(" ")[1:])] + cur_kp[2:] , 
                                 similarity[none_class], Vtest_norm_2])
 
-                    keyphrase_extractions = sorted(keyphrase_extractions, key = operator.itemgetter(1))
+                    keyphrase_extractions = sorted(keyphrase_extractions, key = operator.itemgetter(2), reverse=True)
                     file_output = os.path.join(dir_output, current_filename)
                     stream_output = open(file_output, "w")
                     kp_count = 0
-                    for kpe in keyphrase_extractions[:20]:
+                    for kpe in keyphrase_extractions:
                         kp_count += 1
                         kpe_string = "\t".join(["T" + str(kp_count)] + kpe[0][1:])
                         print >> stream_output, kpe_string.encode("utf-8")

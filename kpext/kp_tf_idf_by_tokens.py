@@ -80,12 +80,9 @@ if __name__ == "__main__":
                             _V = V.copy()
                             for Dckp in D["cur_kp"]:
                                 _V[Dckp] = 1.0
-                            tf_idf_0, t_idf = kpc.idf(_V, D, N)
+                            t_idf = kpc.idf(_V, D, N)
                             tf_idf = kpc.tf_idf(D, t_idf)
-                            sum_tf_idf = 0.0
-                            for term_kp in tf_idf["cur_kp"]:
-                                sum_tf_idf += math.pow(tf_idf["cur_kp"][term_kp], 2)
-                            norm_2 = math.sqrt(sum_tf_idf)
+                            norm_2 = kpc.norm(tf_idf["cur_kp"])
                             tf_idf_kps[cur_kp[2]] = norm_2
                         keyphrase_extractions.append([cur_kp, norm_2])
 

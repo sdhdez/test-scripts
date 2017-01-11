@@ -45,8 +45,8 @@ def get_pos_tags_by_count(pos_seq_filename, count_limit, debug = False):
         pos_sequences.append([t for t in ct_fields])
     return pos_sequences, is_posregex
 
-def print_to_ann(output_stream, _id, type_indexes, kpstr, return_string = False):
-    ann_str = _id + "\t" + type_indexes + "\t" + kpstr
+def print_to_ann(output_stream, cur_id, type_indexes, kpstr, return_string = False):
+    ann_str = cur_id + "\t" + type_indexes + "\t" + kpstr
     if not return_string:
         print >> output_stream, ann_str
     else:
@@ -106,24 +106,24 @@ def tf_normalized(full_texts):
     return tf
 
 def idf(V, D, N):
-    _idf = {}
+    cur_idf = {}
     for t in V:
         for d in D:
             if t in D[d]:
-                _idf.setdefault(t, 0.0)
-                _idf[t] += 1.0
-    for t in _idf:
-        _idf[t] = math.log(N/(1.0 + _idf[t]))
-    return math.log(N), _idf
+                cur_idf.setdefault(t, 0.0)
+                cur_idf[t] += 1.0
+    for t in cur_idf:
+        cur_idf[t] = math.log(N/(1.0 + cur_idf[t]))
+    return cur_idf
 
 def tf_idf(D, t_idf):
     result = {}
     for d in D:
         result.setdefault(d, {})
         for t in D[d]:
-            _tf = D[d][t]
-            _idf = t_idf[t]
-            result[d][t] = _tf * _idf
+            cur_tf = D[d][t]
+            cur_idf = t_idf[t]
+            result[d][t] = cur_tf * cur_idf
     return result
 
 def norm(V):
