@@ -24,10 +24,14 @@ if __name__ == "__main__":
         except:
             print >> sys.stderr, "E) Directories: ", sys.exc_info()
 
-        keyphrase_class = "KeyPhrase"
+        process_class = "Process"
+        task_class = "Task"
+        material_class = "Material"
         none_class = "None"
         train_projection_classes = {}
-        train_projection_classes[keyphrase_class] = []
+        train_projection_classes[process_class] = []
+        train_projection_classes[task_class] = []
+        train_projection_classes[material_class] = []
         train_projection_classes[none_class] = []
         for (dirname, _, filenames) in os.walk(dir_corpus):
             for f in filenames:
@@ -42,10 +46,14 @@ if __name__ == "__main__":
                         train_projection = kpc.get_document_content_ann(dirname, current_filename + "clss")
                         for projection in train_projection:
                             projection_type = projection[1].split(" ")[0]
+                            if projection_type == process_class:
+                                train_projection_classes[process_class].append(projection[2])
+                            if projection_type == task_class:
+                                train_projection_classes[task_class].append(projection[2])
+                            if projection_type == material_class:
+                                train_projection_classes[material_class].append(projection[2])
                             if projection_type == none_class:
                                 train_projection_classes[none_class].append(projection[2])
-                            else:
-                                train_projection_classes[keyphrase_class].append(projection[2])
                     except:
                         print >> sys.stderr, "E) Open files: ", sys.exc_info()
                 else:
@@ -81,7 +89,7 @@ if __name__ == "__main__":
                         if kp_type[0] != none_class and kp_type[1] > 0.0:
                             keyphrase_extractions.append([annotation[0:1] + [" ".join([kp_type[0]] + annotation[1].split(" ")[1:])] + annotation[2:] , 
                                 similarity[none_class]])
-                    
+
                     keyphrase_extractions = sorted(keyphrase_extractions, key = operator.itemgetter(1))
                     file_output = os.path.join(dir_output, current_filename)
                     stream_output = open(file_output, "w")

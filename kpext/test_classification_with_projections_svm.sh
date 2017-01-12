@@ -26,6 +26,7 @@ then
 fi
 
 echo "#Id FilterMinCount precision recall f1score" >> $EVAL_RESULTS_FILE;
+echo "#Id FilterMinCount precision recall f1score" >> $EVAL_RESULTS_FILE".2";
 
 tmp_last_count="";
 current_index=0;
@@ -43,7 +44,7 @@ do
         if [ -d $FULL_NEW_PATH ]
         then
             PROJECTION=$PROJECTIONS_DIR$CUR_PROJECTION
-            python kp_svm_with_projection.py $TRAIN_DIR $PROJECTION $FULL_NEW_PATH $DEBUG;
+            python kp_svm_with_projection_four_classes.py $TRAIN_DIR $PROJECTION $FULL_NEW_PATH $DEBUG;
             read foo precision recall f1score total < <(python $EVAL_SCRIPT $TEST_DIR $FULL_NEW_PATH types | grep "KEYPHRASE");
             echo $current_index $pos_seq_count $precision $recall $f1score >> $EVAL_RESULTS_FILE;
             read foo foo foo precision recall f1score total < <(python $EVAL_SCRIPT $TEST_DIR $FULL_NEW_PATH rel | grep "total");

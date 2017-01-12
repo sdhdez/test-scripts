@@ -8,6 +8,10 @@ POS_OBVIOUS_ERRORS = {
     ']': ['NN', 'NNS', 'NNP']
 }
 
+def my_tokenizer(doc):
+    tokenizer = Tokenizer()
+    return tokenizer.tokenize(doc)
+
 def is_pos_error(token, pos):
     if token in POS_OBVIOUS_ERRORS and pos in POS_OBVIOUS_ERRORS[token]:
         return True
@@ -87,6 +91,7 @@ def get_document_content_ann(dirname, filename):
     except:
         print >> sys.stderr, "E) Single file: ", path_filename, sys.exc_info()            
     return full_text
+
 
 def tf_normalized(full_texts):
     tokenizer = Tokenizer()
