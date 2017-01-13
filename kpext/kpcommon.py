@@ -10,7 +10,11 @@ POS_OBVIOUS_ERRORS = {
 
 def my_tokenizer(doc):
     tokenizer = Tokenizer()
-    return tokenizer.tokenize(doc)
+    return [t.lower() for t in tokenizer.tokenize(doc)]
+
+def my_tokenizer2(doc):
+    tokenizer = Tokenizer()
+    return [t.lower() for t in escape_not_abbreviations(tokenizer.tokenize(doc))]
 
 def is_pos_error(token, pos):
     if token in POS_OBVIOUS_ERRORS and pos in POS_OBVIOUS_ERRORS[token]:
@@ -27,6 +31,9 @@ def escape_not_abbreviations(tokens):
                 new_tokens.append(tokens[index][:-1])
                 new_tokens.append(tokens[index][-1])
                 #print >> sys.stderr, tokens[index], tokens[index + 1]
+            elif tokens[index][-1] == "." and index == length - 1:
+                new_tokens.append(tokens[index][:-1])
+                new_tokens.append(tokens[index][-1])
             else:
                 new_tokens.append(tokens[index])
         except:

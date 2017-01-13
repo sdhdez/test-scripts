@@ -21,6 +21,7 @@ if __name__ == "__main__":
             dir_corpus = sys.argv[1]
             dir_test = sys.argv[2]
             dir_output = sys.argv[3]
+            min_similarity = float(sys.argv[4])
         except:
             print >> sys.stderr, "E) Directories: ", sys.exc_info()
 
@@ -86,7 +87,7 @@ if __name__ == "__main__":
                         similarity = dict(zip(Dnames, cosine_similarity(tfidf_test, tfidf[:-1]).flatten()))
                         kp_type = max(similarity.items(), key=operator.itemgetter(1))
                         #print annotation[2], kp_type
-                        if kp_type[0] != none_class and kp_type[1] > 0.0:
+                        if kp_type[0] != none_class and kp_type[1] > min_similarity:
                             keyphrase_extractions.append([annotation[0:1] + [" ".join([kp_type[0]] + annotation[1].split(" ")[1:])] + annotation[2:] , 
                                 similarity[none_class]])
 

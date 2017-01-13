@@ -46,11 +46,11 @@ do
         if [ -d $FULL_NEW_PATH ]
         then
             PROJECTION=$PROJECTIONS_DIR$CUR_PROJECTION
-            python kp_svm_with_projection_four_classes.py $TRAIN_DIR $PROJECTION $FULL_NEW_PATH $MIN_SIMILARITY $DEBUG;
+            python kp_svm_with_projection_two_classes.py $TRAIN_DIR $PROJECTION $FULL_NEW_PATH $MIN_SIMILARITY $DEBUG;
             read foo precision recall f1score total < <(python $EVAL_SCRIPT $TEST_DIR $FULL_NEW_PATH types | grep "KEYPHRASE");
             echo $current_index $pos_seq_count $precision $recall $f1score >> $EVAL_RESULTS_FILE;
-            read foo foo foo precision recall f1score total < <(python $EVAL_SCRIPT $TEST_DIR $FULL_NEW_PATH rel | grep "total");
-            echo $current_index $pos_seq_count $precision $recall $f1score >> $EVAL_RESULTS_FILE".2";
+            #read foo foo foo precision recall f1score total < <(python $EVAL_SCRIPT $TEST_DIR $FULL_NEW_PATH rel | grep "total");
+            #echo $current_index $pos_seq_count $precision $recall $f1score >> $EVAL_RESULTS_FILE".2";
         fi
         if [[ $DEBUG == "debug" ]]
         then 
