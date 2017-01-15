@@ -74,7 +74,7 @@ if __name__ == "__main__":
                     file_count += 1 #debug
                     if debug and file_count > debug_tests: #debug
                         break #debug
-                    print >> sys.stderr, "Test: ", file_count, f[:-4]
+                    print >> sys.stderr, "Test: ", file_count, f[:-4], min_similarity
                     ann_content = kpc.get_document_content_ann(dirname, current_filename)
                     #print ann_content
                     keyphrase_extractions = []
