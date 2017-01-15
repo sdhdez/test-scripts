@@ -1,16 +1,9 @@
 #!/usr/bin/python 
 import sys
 import os
-import mdb_common_lib as mdbcl
-from nltk.tokenize import TreebankWordTokenizer as Tokenizer
-from nltk.tag.perceptron import PerceptronTagger
 import nltk.data
 import re
 import kpcommon
-
-from nltk.stem import WordNetLemmatizer
-from nltk.stem.lancaster import LancasterStemmer
-from nltk.corpus import stopwords
 
 if __name__ == "__main__":
     try:
@@ -27,18 +20,18 @@ if __name__ == "__main__":
        
         for (dirname, _, filenames) in os.walk(dir_corpus):
             for f in filenames:
-                ext = f[-3:]
-                if ext == 'ann':
+                ext = f[-4:]
+                if ext == '.ann':
                     file_count += 1 #debug
                     if debug and file_count > debug_tests: #debug
                         break #debug
                     print file_count, f[:-4]
                     try:
-                        filename_ann = os.path.join(dirname, f[:-3] + "ann")
+                        filename_ann = os.path.join(dirname, f[:-4] + ".ann")
                         ann_file = open(filename_ann, "r")
-                        filename_proj = os.path.join(dir_projection, f[:-3] + "ann")
+                        filename_proj = os.path.join(dir_projection, f[:-4] + ".ann")
                         proj_file = open(filename_proj, "r")
-                        filename_output_clss = os.path.join(dir_output, f[:-3] + "clss")
+                        filename_output_clss = os.path.join(dir_output, f[:-4] + ".clsse")
                         clss_file = open(filename_output_clss, "w")
                     except:
                         print >> sys.stderr, "E) Open files: ", sys.exc_info()
@@ -85,10 +78,10 @@ if __name__ == "__main__":
                                         for ann_kp in annotanted_keyphrases[prj_start][prj_end]:
                                             prj_kp[1] = ann_kp[1]
                                             kp_count += 1
-                                            kpcommon.print_to_ann(clss_file, (u"T" + str(kp_count)).encode("utf-8"), prj_kp[1].encode("utf-8"), prj_kp[2].encode("utf-8"))
+                                            kpcommon.print_to_ann(clss_file, (u"T" + str(kp_count)).encode("utf-8"), prj_kp[1].encode("utf-8"), prj_kp[2].encode("utf-8"), pos_str = prj_kp[3].encode("utf-8"))
                                     else:
                                         kp_count += 1
-                                        kpcommon.print_to_ann(clss_file, (u"T" + str(kp_count)).encode("utf-8"), prj_kp[1].encode("utf-8"), prj_kp[2].encode("utf-8"))
+                                        kpcommon.print_to_ann(clss_file, (u"T" + str(kp_count)).encode("utf-8"), prj_kp[1].encode("utf-8"), prj_kp[2].encode("utf-8"), pos_str = prj_kp[3].encode("utf-8"))
                 else:
                     continue
     except:

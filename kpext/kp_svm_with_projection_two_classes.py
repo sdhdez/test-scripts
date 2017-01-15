@@ -32,21 +32,22 @@ if __name__ == "__main__":
         train_projection_classes[none_class] = []
         for (dirname, _, filenames) in os.walk(dir_corpus):
             for f in filenames:
-                ext = f[-3:]
-                current_filename = f[:-3]
-                if ext == 'ann':
+                ext = f[-4:]
+                current_filename = f[:-4]
+                if ext == '.ann':
                     file_count += 1 #debug
                     if debug and file_count > debug_tests: #debug
                         break #debug
                     print >> sys.stderr, file_count, f[:-4]
                     try:
-                        train_projection = kpc.get_document_content_ann(dirname, current_filename + "clss")
+                        train_projection = kpc.get_document_content_ann(dirname, current_filename + ".clss")
                         for projection in train_projection:
                             projection_type = projection[1].split(" ")[0]
+                            tokenized_projection = " ".join(kpc.my_tokenizer2(projection[2]))
                             if projection_type == none_class:
-                                train_projection_classes[none_class].append(projection[2])
+                                train_projection_classes[none_class].append(tokenized_projection)
                             else:
-                                train_projection_classes[keyphrase_class].append(projection[2])
+                                train_projection_classes[keyphrase_class].append(tokenized_projection)
                     except:
                         print >> sys.stderr, "E) Open files: ", sys.exc_info()
                 else:
@@ -60,9 +61,9 @@ if __name__ == "__main__":
         file_count = 0
         for (dirname, _, filenames) in os.walk(dir_test):
             for f in filenames:
-                ext = f[-3:]
+                ext = f[-4:]
                 current_filename = f
-                if ext == 'ann':
+                if ext == '.ann':
                     file_count += 1 #debug
                     if debug and file_count > debug_tests: #debug
                         break #debug
@@ -72,8 +73,8 @@ if __name__ == "__main__":
                     keyphrase_extractions = []
                     for annotation in ann_content:
                         tmp_corpus = copy.copy(corpus)
-                        tmp_corpus.append(annotation[2])
-                        vectorizer = TfidfVectorizer(min_df=0, analyzer=kpc.my_tokenizer)
+                        tmp_corpus.append(" ".join(kpc.my_tokenizer2(annotation[2])))
+                        vectorizer = TfidfVectorizer(min_df=0, analyzer=kpc.my_features)
                         tfidf = vectorizer.fit_transform(tmp_corpus)
                         tfidf_test = tfidf[-1:]
                         similarity = dict(zip(Dnames, cosine_similarity(tfidf_test, tfidf[:-1]).flatten()))

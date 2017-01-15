@@ -35,9 +35,9 @@ if __name__ == "__main__":
         Dnames = []
         for (dirname, _, filenames) in os.walk(dir_corpus):
             for f in filenames:
-                ext = f[-3:]
+                ext = f[-4:]
                 current_filename = f[:-4]
-                if ext == 'ann':
+                if ext == '.ann':
                     file_count += 1 #debug
                     if debug and file_count > debug_tests: #debug
                         break #debug
@@ -76,9 +76,9 @@ if __name__ == "__main__":
         file_count = 0
         for (dirname, _, filenames) in os.walk(dir_test):
             for f in filenames:
-                ext = f[-3:]
+                ext = f[-4:]
                 current_filename = f[:-4]
-                if ext == 'ann':
+                if ext == '.ann':
                     file_count += 1 #debug
                     if debug and file_count > debug_tests: #debug
                         break #debug
@@ -136,8 +136,8 @@ if __name__ == "__main__":
                         #    print "None:", ann_tokens, similarity
                         #    continue 
                         #elif kp_type[0] != none_class or kp_type[1] == min_similarity:
-                        print "KP:", ann_tokens, similarity
                         if kp_type[0] != none_class and kp_type[1] > min_similarity:
+                            print "KP:", ann_tokens, similarity
                             keyphrase_extractions.append(
                                         [annotation[0:1] + [" ".join([kp_type[0]] + annotation[1].split(" ")[1:])] + annotation[2:] , 
                                         similarity[none_class]]

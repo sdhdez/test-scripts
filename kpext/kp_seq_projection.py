@@ -39,25 +39,25 @@ if __name__ == "__main__":
         
         for (dirname, _, filenames) in os.walk(dir_corpus):
             for f in filenames:
-                ext = f[-3:]
-                if ext == 'txt':
+                ext = f[-4:]
+                if ext == '.txt':
                     file_count += 1 #debug
                     if debug and file_count > debug_tests: #debug
                         break #debug
                     print file_count, f[:-4]
                     try:
-                        file_text = os.path.join(dirname, f[:-3] + "txt")
+                        file_text = os.path.join(dirname, f[:-4] + ".txt")
                         text_file = open(file_text, "r")
                         raw_text = unicode(text_file.read(), encoding="utf-8")
-                        file_kpe = os.path.join(dir_output, f[:-3] + "ann")
+                        file_kpe = os.path.join(dir_output, f[:-4] + ".ann")
                         kpe_file = open(file_kpe, "w")
                     except:
                         print >> sys.stderr, "E) Open files: ", sys.exc_info()
 
                     text_tokens = tokenizer.tokenize(raw_text)
                     text_tokens = kpcommon.escape_not_abbreviations(text_tokens)
-                    if debug:
-                        print text_tokens
+                    #if debug:
+                    #    print text_tokens, len(text_tokens)
 
                     pos_tags = tagger.tag(text_tokens)
                     pos_tags_string = " ".join([pt[1] for pt in pos_tags])
@@ -79,11 +79,12 @@ if __name__ == "__main__":
                             real_pos_seq =  " ".join([pos_i for tok_i, pos_i in pos_tags[token_index_start:token_index_end]])
                             real_token_seq =  " ".join([tok_i for tok_i, pos_i in pos_tags[token_index_start:token_index_end]])
                             if debug:
-                                print pos_seq_start, pos_seq_end, token_index_start, token_offset, 
-                                print pos_tags[token_index_start:token_index_end]
-                                print pos_match_string == pos_tags_string[pos_seq_start:pos_seq_end], 
-                                print pos_match_string == real_pos_seq, real_pos_seq, 
-                                print real_token_seq
+                                pass
+                                #print pos_seq_start, pos_seq_end, token_index_start, token_offset, 
+                                #print pos_tags[token_index_start:token_index_end]
+                                #print pos_match_string == pos_tags_string[pos_seq_start:pos_seq_end], 
+                                #print pos_match_string == real_pos_seq, real_pos_seq, 
+                                #print real_token_seq
                             if pos_match_string == real_pos_seq:
                                 is_pos_valid = True
                                 for pt in pos_tags[token_index_start:token_index_end]:
@@ -95,12 +96,12 @@ if __name__ == "__main__":
                                     kps_candidates.setdefault(real_token_seq, [0, set()])
                                     kps_candidates[real_token_seq][0] += 1 
                                     kps_candidates[real_token_seq][1].add(str(ct))
-                    if debug:
-                        print >> sys.stderr, "-- Match:", test_match
+                    #if debug:
+                        #print >> sys.stderr, "-- Match:", test_match
 
                     #print kps_candidates, len(kps_candidates)
-                    if debug:
-                        print "\n".join([str(c) for c in kps_candidates.items()]), len(kps_candidates)
+                    #if debug:
+                    #    print "\n".join([str(c) for c in kps_candidates.items()]), len(kps_candidates)
                     i = 0
                     tmp_kps_candidates = []
                     for kp in kps_candidates.keys():
@@ -127,14 +128,16 @@ if __name__ == "__main__":
                             start = m.start(1)
                             end = m.end(1)
                             i += 1
-                            term_string = "T" + str(i) + "\tNone " + str(start) + " " + str(end) + "\t" + raw_text[start:end]
+                            pos_seq_str = eval(list(kps_candidates[kp][1])[0])[2]
+                            term_string = "T" + str(i) + "\tNone " + str(start) + " " + str(end) + "\t" + raw_text[start:end] + "\t" + pos_seq_str
                             term_string = term_string.encode("utf-8")
                             print >> kpe_file, term_string
                             tmp_kps_candidates.append((start, end, m.span(1), kp, raw_text[start:end]))
                     kps_candidates = sorted(tmp_kps_candidates, key=lambda tup: tup[0])
                     if debug:
-                        print "\n".join([str(c) for c in kps_candidates])
-                        print "Candidates:", len(kps_candidates)
+                        pass
+                        #print "\n".join([str(c) for c in kps_candidates])
+                        #print "Candidates:", len(kps_candidates)
                     text_file.close()
                     kpe_file.close()
                 else:

@@ -16,6 +16,10 @@ def my_tokenizer2(doc):
     tokenizer = Tokenizer()
     return [t.lower() for t in escape_not_abbreviations(tokenizer.tokenize(doc))]
 
+def my_features(doc):
+    features = doc.split(" ")
+    return features
+
 def is_pos_error(token, pos):
     if token in POS_OBVIOUS_ERRORS and pos in POS_OBVIOUS_ERRORS[token]:
         return True
@@ -31,7 +35,7 @@ def escape_not_abbreviations(tokens):
                 new_tokens.append(tokens[index][:-1])
                 new_tokens.append(tokens[index][-1])
                 #print >> sys.stderr, tokens[index], tokens[index + 1]
-            elif tokens[index][-1] == "." and index == length - 1:
+            elif len(tokens[index]) > 1 and tokens[index][-1] == "." and index == length - 1:
                 new_tokens.append(tokens[index][:-1])
                 new_tokens.append(tokens[index][-1])
             else:
@@ -40,6 +44,7 @@ def escape_not_abbreviations(tokens):
             print >> sys.stderr, "E) Abbreviation", tokens, index
             new_tokens.append(tokens[index])
     return new_tokens    
+
 
 def get_pos_tags_by_count(pos_seq_filename, count_limit, debug = False):
     is_posregex = False
@@ -56,8 +61,11 @@ def get_pos_tags_by_count(pos_seq_filename, count_limit, debug = False):
         pos_sequences.append([t for t in ct_fields])
     return pos_sequences, is_posregex
 
-def print_to_ann(output_stream, cur_id, type_indexes, kpstr, return_string = False):
-    ann_str = cur_id + "\t" + type_indexes + "\t" + kpstr
+def print_to_ann(output_stream, cur_id, type_indexes, kpstr, pos_str = None, return_string = False):
+    if pos_str:
+        ann_str = cur_id + "\t" + type_indexes + "\t" + kpstr + "\t" + pos_str
+    else:
+        ann_str = cur_id + "\t" + type_indexes + "\t" + kpstr
     if not return_string:
         print >> output_stream, ann_str
     else:
