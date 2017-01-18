@@ -16,11 +16,11 @@ if __name__ == "__main__":
 
         for (dirname, _, filenames) in os.walk(dir_corpus):
             for f in filenames:
-                ext = f[-3:]
-                if ext == 'ann':
-                    file_ann = os.path.join(dirname, f[:-3] + "ann")
+                ext = f[-4:]
+                if ext == '.ann':
+                    file_ann = os.path.join(dirname, f[:-4] + ".ann")
                     ann_file = open(file_ann, "r")
-                    file_ann_ext = os.path.join(dir_output, f[:-3] + "anne")
+                    file_ann_ext = os.path.join(dir_output, f[:-4] + ".anne")
                     ann_ext_file = open(file_ann_ext, "w")
                     print f[:-4]
                     indexes_kp_tmp = {}
@@ -46,9 +46,9 @@ if __name__ == "__main__":
                     ann_file.close()
                     ann_ext_file.close()
 
-                    file_text = os.path.join(dirname, f[:-3] + "txt")
+                    file_text = os.path.join(dirname, f[:-4] + ".txt")
                     text_file = open(file_text, "r")
-                    file_nokp = os.path.join(dir_output, f[:-3] + "nann")
+                    file_nokp = os.path.join(dir_output, f[:-4] + ".nann")
                     nokp_file = open(file_nokp, "w")
 
                     raw_text = unicode(text_file.read(), encoding="utf-8")

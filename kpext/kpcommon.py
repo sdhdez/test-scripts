@@ -16,9 +16,30 @@ def my_tokenizer2(doc):
     tokenizer = Tokenizer()
     return [t.lower() for t in escape_not_abbreviations(tokenizer.tokenize(doc))]
 
+def my_tokenizer3(doc, tokenizer = None):
+    return [t.lower() for t in escape_not_abbreviations(tokenizer.tokenize(doc))]
+
 def my_features(doc):
     features = doc.split(" ")
     return features
+
+def my_features_as_string(doc, pos, tokenizer):
+    features = " ".join(my_tokenizer3(doc, tokenizer))
+    features += " " + " ".join([ "sufix[-3:]=%s " % t[-3:] +   
+                                    "sufix[-2:]=%s " % t[-2:] +
+                                    "prefix[0:2]=%s " % t[0:2] +
+                                    "prefix[0:3]=%s " % t[0:3] +
+                                    "isupper=%s " % t.isupper() +
+                                    "istitle=%s " % t.istitle() +
+                                    "isdigit=%s" % t.isdigit()
+                                 for t in doc.split()])
+    features += " " + " ".join(["pos=%s" % p for p in pos.split()])
+    #print features
+    return features
+
+def pos_tagger(doc, tagger, tokenizer):
+    return " ".join([t[1] for t in tagger.tag(my_tokenizer3(doc, tokenizer))])
+
 
 def is_pos_error(token, pos):
     if token in POS_OBVIOUS_ERRORS and pos in POS_OBVIOUS_ERRORS[token]:
@@ -44,7 +65,6 @@ def escape_not_abbreviations(tokens):
             print >> sys.stderr, "E) Abbreviation", tokens, index
             new_tokens.append(tokens[index])
     return new_tokens    
-
 
 def get_pos_tags_by_count(pos_seq_filename, count_limit, debug = False):
     is_posregex = False
@@ -107,7 +127,6 @@ def get_document_content_ann(dirname, filename):
         print >> sys.stderr, "E) Single file: ", path_filename, sys.exc_info()            
     return full_text
 
-
 def tf_normalized(full_texts):
     tokenizer = Tokenizer()
     tf = {}
@@ -158,3 +177,56 @@ def v1_dot_v2(V1, V2):
         if v1 in V2:
             S_v1v2 += V1[v1]*V2[v1]
     return S_v1v2
+
+def word2features(sent, i):
+    word = sent[i][0]
+    postag = sent[i][1]
+    features = [
+        'bias',
+        'word.lower=' + word.lower(),
+        'word[-3:]=' + word[-3:],
+        'word[-2:]=' + word[-2:],
+        'word.isupper=%s' % word.isupper(),
+        'word.istitle=%s' % word.istitle(),
+        'word.isdigit=%s' % word.isdigit(),
+        'postag=' + postag,
+        'postag[:2]=' + postag[:2],
+    ]
+    if i > 0:
+        word1 = sent[i-1][0]
+        postag1 = sent[i-1][1]
+        features.extend([
+            '-1:word.lower=' + word1.lower(),
+            '-1:word.istitle=%s' % word1.istitle(),
+            '-1:word.isupper=%s' % word1.isupper(),
+            '-1:postag=' + postag1,
+            '-1:postag[:2]=' + postag1[:2],
+        ])
+    else:
+        features.append('BOS')
+        
+    if i < len(sent)-1:
+        word1 = sent[i+1][0]
+        postag1 = sent[i+1][1]
+        features.extend([
+            '+1:word.lower=' + word1.lower(),
+            '+1:word.istitle=%s' % word1.istitle(),
+            '+1:word.isupper=%s' % word1.isupper(),
+            '+1:postag=' + postag1,
+            '+1:postag[:2]=' + postag1[:2],
+        ])
+    else:
+        features.append('EOS')
+                
+    return features
+
+def sent2features(sent):
+    return [word2features(sent, i) for i in range(len(sent))]
+
+def sent2labels(sent):
+    return [label for token, postag, label in sent]
+
+def sent2tokens(sent):
+    return [token for token, postag, label in sent]   
+
+
