@@ -21,13 +21,17 @@ if __name__ == "__main__":
 
         dir_corpus = sys.argv[1]       
         dir_output = sys.argv[2]
+        try:
+            training_crfsuite = sys.argv[3]
+        except:
+            training_crfsuite = 'keyphrase.crfsuite'
 
         tokenizer = Tokenizer()
         #pos
         tagger = PerceptronTagger()
 
         crftagger = pycrfsuite.Tagger()
-        crftagger.open('keyphrase-0.crfsuite')
+        crftagger.open(training_crfsuite)
 
         #test_sents = []
         for (dirname, _, filenames) in os.walk(dir_corpus):
@@ -48,45 +52,29 @@ if __name__ == "__main__":
                     tagged_text = [t + ("None",)  for t in tagger.tag(tokens)]
                     text_file.close()
                     #test_sents.append(tagged_text)
-                    if debug:
-                        print >> sys.stderr, raw_text
-
                     X_test = kpc.sent2features(tagged_text)
-                    is_none = "None"
-                    last_label = is_none
+                    is_not_kp = "None"
+                    tmp_label = is_not_kp
                     new_kp = []
                     kp_list = []
                     for kp in zip(crftagger.tag(X_test), [tt[0] for tt in tagged_text]):
-                        if debug:
+                        if debug and False:
                             print >> sys.stderr, "    ---- ", kp
-                        if kp[0] != is_none:
-                            if kp[0] == last_label:
-                                new_kp.append(kp[1])
-                            else:
-                                if new_kp:
-                                    if debug:
-                                        print >> sys.stderr, (last_label, new_kp)
-                                    kp_list.append((last_label, [nkp for nkp in new_kp]))
-                                new_kp = []
-                                new_kp.append(kp[1])
-                                last_label = kp[0]
-                        elif new_kp:
-                            if debug:
-                                print >> sys.stderr, (last_label, new_kp)
-                            kp_list.append((last_label, " ".join(new_kp)))
+                        if kp[0][0:2] == "B-":
+                            if new_kp and tmp_label != is_not_kp:
+                                kp_list.append((tmp_label, " ".join(new_kp)))
+                            tmp_label = kp[0][2:]
                             new_kp = []
-                            last_label = is_none
+                        new_kp.append(kp[1])
                     if new_kp:
-                        if debug:
-                            print >> sys.stderr, (last_label, new_kp)
-                        kp_list.append((last_label, " ".join(new_kp)))
-                        new_kp = []
-                        last_label = is_none
-                   
-                    if debug:
+                        kp_list.append((tmp_label, " ".join(new_kp)))
+
+                    if debug and False:
                         print >> sys.stderr, raw_text
+
                     kp_index = 0
                     for kp in kp_list:
+                        print kp
                         kp_iter_counter = 0
                         for m in re.finditer("\W?(" + re.escape(kp[1]) + ")\W", raw_text):
                             kp_iter_counter += 1
@@ -98,18 +86,15 @@ if __name__ == "__main__":
                             term_string = term_string.encode("utf-8")
                             print >> kpe_file, term_string
                             #tmp_kps_candidates.append((start, end, m.span(1), kp, raw_text[start:end]))
-
                         if debug and kp_iter_counter == 0:  
                             """
                                 There is an error here and in the projections.
                                 The match is made by tokens.
                                 When some of semi-colon, comma or ( ) there is an extra espace. 
                             """
-                            print >> sys.stderr, raw_text
+                            #print >> sys.stderr, raw_text
                             print >> sys.stderr, kp_iter_counter, ": ", kp[1].encode("utf-8")
-
                     kpe_file.close()
-
     except:
         print >> sys.stderr
         print >> sys.stderr, "usage: python", sys.argv[0], "<corpus_dir_path> <output_dir_path>"

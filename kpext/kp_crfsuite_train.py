@@ -4,64 +4,8 @@ import os
 from nltk.tokenize import TreebankWordTokenizer as Tokenizer
 from nltk.tag.perceptron import PerceptronTagger
 import operator
-from itertools import chain
-import nltk
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.preprocessing import LabelBinarizer
-import sklearn
 import pycrfsuite
-
-def word2features(sent, i):
-    word = sent[i][0]
-    postag = sent[i][1]
-    features = [
-        'bias',
-        'word.lower=' + word.lower(),
-        'word[-3:]=' + word[-3:],
-        'word[-2:]=' + word[-2:],
-        'word.isupper=%s' % word.isupper(),
-        'word.istitle=%s' % word.istitle(),
-        'word.isdigit=%s' % word.isdigit(),
-        'postag=' + postag,
-        'postag[:2]=' + postag[:2],
-    ]
-    if i > 0:
-        word1 = sent[i-1][0]
-        postag1 = sent[i-1][1]
-        features.extend([
-            '-1:word.lower=' + word1.lower(),
-            '-1:word.istitle=%s' % word1.istitle(),
-            '-1:word.isupper=%s' % word1.isupper(),
-            '-1:postag=' + postag1,
-            '-1:postag[:2]=' + postag1[:2],
-        ])
-    else:
-        features.append('BOS')
-        
-    if i < len(sent)-1:
-        word1 = sent[i+1][0]
-        postag1 = sent[i+1][1]
-        features.extend([
-            '+1:word.lower=' + word1.lower(),
-            '+1:word.istitle=%s' % word1.istitle(),
-            '+1:word.isupper=%s' % word1.isupper(),
-            '+1:postag=' + postag1,
-            '+1:postag[:2]=' + postag1[:2],
-        ])
-    else:
-        features.append('EOS')
-                
-    return features
-
-def sent2features(sent):
-    return [word2features(sent, i) for i in range(len(sent))]
-
-def sent2labels(sent):
-    return [label for token, postag, label in sent]
-
-def sent2tokens(sent):
-    return [token for token, postag, label in sent]   
-
+import kpcommon as kpc
 
 if __name__ == "__main__":
     try:
@@ -109,6 +53,10 @@ if __name__ == "__main__":
                             ann_text = ann_items[2]
                             tokens = tokenizer.tokenize(ann_text)
                             pos_tags = [t + (type_indexes[0],)  for t in tagger.tag(tokens)]
+                            if pos_tags:
+                                pos_tags[0] = pos_tags[0][0:2] + ("B-" + pos_tags[0][2],)
+                                if debug:
+                                    print >> sys.stderr, pos_tags
                             annotations[" ".join([str(ti) for ti in type_indexes[1:]])] = pos_tags
                             #print >> ann_ext_file, " ".join([str(ti) for ti in type_indexes]) + "\t" + ann_text + "\t" + pos_tags
                     ann_file.close()
@@ -155,6 +103,11 @@ if __name__ == "__main__":
                         not_kp_text = raw_text[i:start]
                         tokens = tokenizer.tokenize(not_kp_text)
                         pos_tags = [t + ("None",)  for t in tagger.tag(tokens)]
+                        if pos_tags:
+                            pos_tags[0] = pos_tags[0][0:2] + ("B-" + pos_tags[0][2],)
+                            if debug:
+                                print >> sys.stderr, pos_tags
+
                         train_sent += pos_tags
 
                         if key_index in annotations:
@@ -178,9 +131,9 @@ if __name__ == "__main__":
                     train_sents.append(train_sent)
 
         if debug:
-            print >> sys.stderr, sent2features(train_sents[0])[0]
-        X_train = [sent2features(s) for s in train_sents]
-        y_train = [sent2labels(s) for s in train_sents]
+            print >> sys.stderr, kpc.sent2features(train_sents[0])[0]
+        X_train = [kpc.sent2features(s) for s in train_sents]
+        y_train = [kpc.sent2labels(s) for s in train_sents]
         
         trainer = pycrfsuite.Trainer(verbose=False)
         for xseq, yseq in zip(X_train, y_train):
