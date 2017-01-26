@@ -56,6 +56,7 @@ if __name__ == "__main__":
                         index_list = projection[1].split()
                         start = int(index_list[1])
                         end = int(index_list[2])
+                        prev_token = False
 
                         if start > 0:
                             prev_text = raw_text[0:start]
