@@ -245,3 +245,19 @@ def shortest_keyphrases(kp_list, index_start = 1, index_end = 2):
             print "POP:", kp_list.pop(pop_item)
             pop_item, last_start, last_end, list_change = -1, -1, -1, True
 
+def largest_keyphrases(kp_list, index_start = 1, index_end = 2):
+    pop_item, last_start, last_end, list_change = -1, -1, -1, True
+    while(list_change):
+        list_change = False
+        for i, kp in enumerate(kp_list):
+            start = kp[index_start]
+            end = kp[index_end]
+            if last_start <= start and last_end >= end:
+                 pop_item = i
+                 break
+            last_start = start
+            last_end = end
+        if pop_item > -1:
+            print "POP:", kp_list.pop(pop_item)
+            pop_item, last_start, last_end, list_change = -1, -1, -1, True
+
