@@ -14,7 +14,8 @@ if __name__ == "__main__":
         file_count = 0
 
         dir_corpus = sys.argv[1]
-        
+        target_class = sys.argv[2] if len(sys.argv) > 2 else ''
+
         tokenizer = Tokenizer()
         #pos
         tagger = PerceptronTagger()
@@ -109,7 +110,13 @@ if __name__ == "__main__":
                             last_label = "B-None"
                             train_labels.append(last_label)
                         train_tokens.append(annotation_tokens[0])
-                        curr_label = "B-" + annotations[indexes][1]
+                        
+                        #If it is not the target class then it is None
+                        if target_class == annotations[indexes][1]: 
+                            curr_label = "B-" + annotations[indexes][1]
+                        else:
+                            curr_label = "B-None"
+
                         if last_label == curr_label:
                             train_labels.append(last_label[2:])
                         else:
@@ -145,7 +152,7 @@ if __name__ == "__main__":
                 'feature.possible_transitions': True
         })
         trainer.params()
-        trainer.train('keyphrase_projection.crfsuite')
+        trainer.train('keyphrase_projection' + ( '.' + target_class if target_class != '' else '' ) + '.crfsuite')
         print trainer.logparser.last_iteration
     except:
         print >> sys.stderr

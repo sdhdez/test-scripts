@@ -2,6 +2,7 @@ import sys
 import os
 import math
 from nltk.tokenize import TreebankWordTokenizer as Tokenizer
+import operator
 
 POS_OBVIOUS_ERRORS = {
     '[': ['NN', 'NNS', 'NNP'],
@@ -229,7 +230,8 @@ def sent2labels(sent):
 def sent2tokens(sent):
     return [token for token, postag, label in sent]   
 
-def shortest_keyphrases(kp_list, index_start = 1, index_end = 2):
+
+def shortest_keyphrases_pop(kp_list, index_start = 1, index_end = 2):
     pop_item, last_start, last_end, list_change = -1, -1, -1, True
     while(list_change):
         list_change = False
@@ -244,8 +246,18 @@ def shortest_keyphrases(kp_list, index_start = 1, index_end = 2):
         if pop_item > -1:
             print "POP:", kp_list.pop(pop_item)
             pop_item, last_start, last_end, list_change = -1, -1, -1, True
+    return kp_list
+   
+def shortest_keyphrases(kp_list, index_start = 1, index_end = 2):
+    print "kp_list, len", len(kp_list)
+    kp_list = sorted(kp_list, key=operator.itemgetter(2), reverse=True)
+    kp_list = shortest_keyphrases_pop(kp_list, index_start = index_start, index_end = index_end)
+    kp_list = sorted(kp_list, key=operator.itemgetter(1))
+    kp_list = shortest_keyphrases_pop(kp_list, index_start = index_start, index_end = index_end)
+    print "kp_list, len", len(kp_list)
+    return kp_list
 
-def largest_keyphrases(kp_list, index_start = 1, index_end = 2):
+def largest_keyphrases_pop(kp_list, index_start = 1, index_end = 2):
     pop_item, last_start, last_end, list_change = -1, -1, -1, True
     while(list_change):
         list_change = False
@@ -260,4 +272,13 @@ def largest_keyphrases(kp_list, index_start = 1, index_end = 2):
         if pop_item > -1:
             print "POP:", kp_list.pop(pop_item)
             pop_item, last_start, last_end, list_change = -1, -1, -1, True
+    return kp_list
 
+def largest_keyphrases(kp_list, index_start = 1, index_end = 2):
+    print "kp_list, len", len(kp_list)
+    kp_list = sorted(kp_list, key=operator.itemgetter(2), reverse=True)
+    kp_list = largest_keyphrases_pop(kp_list, index_start = index_start, index_end = index_end)
+    kp_list = sorted(kp_list, key=operator.itemgetter(1))
+    kp_list = largest_keyphrases_pop(kp_list, index_start = index_start, index_end = index_end)
+    print "kp_list, len", len(kp_list)
+    return kp_list

@@ -24,14 +24,25 @@ if __name__ == "__main__":
         try:
             training_crfsuite = sys.argv[3]
         except:
-            training_crfsuite = 'keyphrase.crfsuite'
+            training_crfsuite = 'keyphrase_projection'
 
         tokenizer = Tokenizer()
         #pos
         tagger = PerceptronTagger()
 
-        crftagger = pycrfsuite.Tagger()
-        crftagger.open(training_crfsuite)
+        crfsuite_training_types = []
+        for ctc in ['Process', 'Task', 'Material']:
+            crfsuite_training_types.append('keyphrase_projection.' + ctc + '.crfsuite')
+
+        crftagger0 = pycrfsuite.Tagger()
+        crftagger0.open(crfsuite_training_types[0])
+
+        crftagger1 = pycrfsuite.Tagger()
+        crftagger1.open(crfsuite_training_types[1])
+
+        crftagger2 = pycrfsuite.Tagger()
+        crftagger2.open(crfsuite_training_types[2])
+
 
         #test_sents = []
         for (dirname, _, filenames) in os.walk(dir_corpus):
@@ -96,42 +107,90 @@ if __name__ == "__main__":
                             print >> std.stderr, "Tagged projection", tagged_text
 
                         X_test = kpc.sent2features(tagged_text)
+
                         is_not_kp = "None"
                         tmp_label = is_not_kp
                         new_kp = []
 
-                        X_labeled = crftagger.tag(X_test)
-                        if debug and False:
-                            print >> std.stderr, X_labeled, tagged_text, X_test
+
+                        X_labeled_0 = crftagger0.tag(X_test)
+                        X_labeled_1 = crftagger1.tag(X_test)
+                        X_labeled_2 = crftagger2.tag(X_test)
+
+                        #if debug and False:
+                        #    print >> std.stderr, X_labeled, tagged_text, X_test
                         
                         if tagged_text:
                             if tagged_text[0][2] == dummy_label:
-                                X_labeled.pop(0)
+                                X_labeled_0.pop(0)
+                                X_labeled_1.pop(0)
+                                X_labeled_2.pop(0)
                                 tagged_text.pop(0)
                             if tagged_text[-1][2] == dummy_label:
-                                X_labeled.pop(-1)
+                                X_labeled_0.pop(-1)
+                                X_labeled_1.pop(-1)
+                                X_labeled_2.pop(-1)
                                 tagged_text.pop(-1)
                         
-                        if X_labeled[0][0:2] != "B-" or "B-None" in X_labeled or "None" in X_labeled:
-                            continue
+                        is_not_kp = "None"
+                        tmp_label = is_not_kp
+                        new_kp = []
 
-                        for kp in zip(X_labeled, [tt[0] for tt in tagged_text]):
-                            if debug and False:
-                                print >> sys.stderr, "    ---- ", kp
-                            if kp[0][0:2] == "B-":
-                                if new_kp and tmp_label != is_not_kp:
-                                    kp_list.append((tmp_label, start, end))
-                                tmp_label = kp[0][2:]
-                                new_kp = []
-                            new_kp.append(kp[1])
-                        if new_kp:
-                            kp_list.append((tmp_label, start, end))
+
+                        if X_labeled_0[0][0:2] == "B-" and not("B-None" in X_labeled_0) and not ("None" in X_labeled_0):
+                            for kp in zip(X_labeled_0, [tt[0] for tt in tagged_text]):
+                                if debug and False:
+                                    print >> sys.stderr, "    ---- ", kp
+                                if kp[0][0:2] == "B-":
+                                    if new_kp and tmp_label != is_not_kp:
+                                        kp_list.append((tmp_label, start, end))
+                                    tmp_label = kp[0][2:]
+                                    new_kp = []
+                                new_kp.append(kp[1])
+                            if new_kp:
+                                kp_list.append((tmp_label, start, end))
+
+                        is_not_kp = "None"
+                        tmp_label = is_not_kp
+                        new_kp = []
+
+
+                        if X_labeled_1[0][0:2] == "B-" and not("B-None" in X_labeled_1) and not ("None" in X_labeled_1):
+                            for kp in zip(X_labeled_1, [tt[0] for tt in tagged_text]):
+                                if debug and False:
+                                    print >> sys.stderr, "    ---- ", kp
+                                if kp[0][0:2] == "B-":
+                                    if new_kp and tmp_label != is_not_kp:
+                                        kp_list.append((tmp_label, start, end))
+                                    tmp_label = kp[0][2:]
+                                    new_kp = []
+                                new_kp.append(kp[1])
+                            if new_kp:
+                                kp_list.append((tmp_label, start, end))
+
+                        is_not_kp = "None"
+                        tmp_label = is_not_kp
+                        new_kp = []
+
+
+                        if X_labeled_2[0][0:2] == "B-" and not("B-None" in X_labeled_2) and not ("None" in X_labeled_2):
+                            for kp in zip(X_labeled_2, [tt[0] for tt in tagged_text]):
+                                if debug and False:
+                                    print >> sys.stderr, "    ---- ", kp
+                                if kp[0][0:2] == "B-":
+                                    if new_kp and tmp_label != is_not_kp:
+                                        kp_list.append((tmp_label, start, end))
+                                    tmp_label = kp[0][2:]
+                                    new_kp = []
+                                new_kp.append(kp[1])
+                            if new_kp:
+                                kp_list.append((tmp_label, start, end))
 
                     print >> sys.stderr, file_count, training_crfsuite
 
                     #kp_list = kpc.shortest_keyphrases(kp_list)
                     kp_list = kpc.largest_keyphrases(kp_list) 
-        
+ 
                     kp_index = 0
                     for kp in kp_list:
                         kp_index += 1 
