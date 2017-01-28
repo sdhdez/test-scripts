@@ -12,6 +12,7 @@ import sklearn
 import pycrfsuite
 import re
 import kpcommon as kpc 
+import mdb_common_lib as mdbcl
 
 if __name__ == "__main__":
     try:
@@ -32,6 +33,9 @@ if __name__ == "__main__":
 
         crftagger = pycrfsuite.Tagger()
         crftagger.open(training_crfsuite)
+
+        extra_features = False
+        qr = mdbcl.QueryResources()
 
         #test_sents = []
         for (dirname, _, filenames) in os.walk(dir_corpus):
@@ -95,10 +99,15 @@ if __name__ == "__main__":
                         if debug and False:
                             print >> std.stderr, "Tagged projection", tagged_text
 
-                        X_test = kpc.sent2features(tagged_text)
+                        if extra_features:
+                            X_test = kpc.sent2features_extra(tagged_text, qr)
+                        else:
+                            X_test = kpc.sent2features(tagged_text)
+
                         is_not_kp = "None"
                         tmp_label = is_not_kp
                         new_kp = []
+                        new_list_labels = []
 
                         X_labeled = crftagger.tag(X_test)
                         if debug and False:
@@ -113,6 +122,8 @@ if __name__ == "__main__":
                                 tagged_text.pop(-1)
                         
                         if X_labeled[0][0:2] != "B-" or "B-None" in X_labeled or "None" in X_labeled:
+                            if debug:
+                                print >> sys.stderr, "  ### skip ", X_labeled, tagged_text
                             continue
 
                         for kp in zip(X_labeled, [tt[0] for tt in tagged_text]):
@@ -120,17 +131,20 @@ if __name__ == "__main__":
                                 print >> sys.stderr, "    ---- ", kp
                             if kp[0][0:2] == "B-":
                                 if new_kp and tmp_label != is_not_kp:
-                                    kp_list.append((tmp_label, start, end))
+                                    kp_list.append((tmp_label, start, end, projection[2], [tmpl for tmpl in new_list_labels]))
                                 tmp_label = kp[0][2:]
                                 new_kp = []
+                                new_list_labels = []
                             new_kp.append(kp[1])
+                            new_list_labels.append(kp[0])
                         if new_kp:
-                            kp_list.append((tmp_label, start, end))
+                            kp_list.append((tmp_label, start, end, projection[2], [tmpl for tmpl in new_list_labels] ))
 
                     print >> sys.stderr, file_count, training_crfsuite
 
                     #kp_list = kpc.shortest_keyphrases(kp_list)
-                    kp_list = kpc.largest_keyphrases(kp_list) 
+                    #kp_list = kpc.largest_keyphrases(kp_list) 
+                    #kp_list = kpc.deal_with_overlapping(kp_list) 
         
                     kp_index = 0
                     for kp in kp_list:
@@ -142,9 +156,6 @@ if __name__ == "__main__":
                         term_string = term_string.encode("utf-8")
                         print >> kpe_file, term_string
                         #tmp_kps_candidates.append((start, end, m.span(1), kp, raw_text[start:end]))
-                        if debug and kp_iter_counter == 0:  
-                            #print >> sys.stderr, raw_text
-                            print >> sys.stderr, kp_iter_counter, ": ", kp[1].encode("utf-8")
                     print >> sys.stderr, "File:", file_count, "KeyPhrases:", len(kp_list)
                     kpe_file.close()
     except:

@@ -221,6 +221,56 @@ def word2features(sent, i):
                 
     return features
 
+def word2features_extra(sent, i, qr):
+    word = sent[i][0]
+    postag = sent[i][1]
+    features = [
+        'bias',
+        'word.lower=' + word.lower(),
+        'word[-3:]=' + word[-3:],
+        'word[-2:]=' + word[-2:],
+        'word.isupper=%s' % word.isupper(),
+        'word.istitle=%s' % word.istitle(),
+        'word.isdigit=%s' % word.isdigit(),
+        'postag=' + postag,
+        'postag[:2]=' + postag[:2],
+    ]
+    if i > 0:
+        word1 = sent[i-1][0]
+        postag1 = sent[i-1][1]
+
+        is_bigram = qr.is_bigram_in_titles(word1, word)
+
+        features.extend([
+            '-1:word.lower=' + word1.lower(),
+            '-1:word.istitle=%s' % word1.istitle(),
+            '-1:word.isupper=%s' % word1.isupper(),
+            '-1:postag=' + postag1,
+            '-1:postag[:2]=' + postag1[:2],
+            #'-1:bigram=%s' % is_bigram,
+        ])
+    else:
+        features.append('BOS')
+        
+    if i < len(sent)-1:
+        word1 = sent[i+1][0]
+        postag1 = sent[i+1][1]
+
+        is_bigram = qr.is_bigram_in_titles(word, word1)
+
+        features.extend([
+            '+1:word.lower=' + word1.lower(),
+            '+1:word.istitle=%s' % word1.istitle(),
+            '+1:word.isupper=%s' % word1.isupper(),
+            '+1:postag=' + postag1,
+            '+1:postag[:2]=' + postag1[:2],
+            #'+1:bigram=%s' % is_bigram,
+        ])
+    else:
+        features.append('EOS')
+    print features                
+    return features
+
 def sent2features(sent):
     return [word2features(sent, i) for i in range(len(sent))]
 
@@ -230,6 +280,8 @@ def sent2labels(sent):
 def sent2tokens(sent):
     return [token for token, postag, label in sent]   
 
+def sent2features_extra(sent, qr):
+    return [word2features_extra(sent, i, qr) for i in range(len(sent))]
 
 def shortest_keyphrases_pop(kp_list, index_start = 1, index_end = 2):
     pop_item, last_start, last_end, list_change = -1, -1, -1, True
@@ -280,5 +332,30 @@ def largest_keyphrases(kp_list, index_start = 1, index_end = 2):
     kp_list = largest_keyphrases_pop(kp_list, index_start = index_start, index_end = index_end)
     kp_list = sorted(kp_list, key=operator.itemgetter(1))
     kp_list = largest_keyphrases_pop(kp_list, index_start = index_start, index_end = index_end)
+    print "kp_list, len", len(kp_list)
+    return kp_list
+
+def deal_with_overlapping_pop(kp_list, index_start = 1, index_end = 2):
+    pop_item, last_start, last_end, list_change = -1, -1, -1, True
+    while(list_change):
+        list_change = False
+        for i, kp in enumerate(kp_list):
+            start = kp[index_start]
+            end = kp[index_end]
+            if last_start <= start and last_end >= end:
+                 pop_item = i
+                 break
+            last_start = start
+            last_end = end
+        if pop_item > -1:
+            print "POP:", kp_list.pop(pop_item)
+            pop_item, last_start, last_end, list_change = -1, -1, -1, True
+    return kp_list
+
+
+def deal_with_overlapping(kp_list, index_start = 1, index_end = 2):
+    print "kp_list, len", len(kp_list)
+    kp_list = sorted(kp_list, key=operator.itemgetter(2), reverse=True)
+    kp_list = deal_with_overlapping_pop(kp_list, index_start = index_start, index_end = index_end)
     print "kp_list, len", len(kp_list)
     return kp_list

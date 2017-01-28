@@ -6,6 +6,7 @@ from nltk.tag.perceptron import PerceptronTagger
 import operator
 import pycrfsuite
 import kpcommon as kpc
+import mdb_common_lib as mdbcl
 
 if __name__ == "__main__":
     try:
@@ -14,11 +15,14 @@ if __name__ == "__main__":
         file_count = 0
 
         dir_corpus = sys.argv[1]
-        target_class = sys.argv[2] if len(sys.argv) > 2 else ''
+        target_type = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] != 'debug' else ''
 
         tokenizer = Tokenizer()
         #pos
         tagger = PerceptronTagger()
+
+        extra_features = True
+        qr = mdbcl.QueryResources()
 
         train_sents = []
 
@@ -112,8 +116,9 @@ if __name__ == "__main__":
                         train_tokens.append(annotation_tokens[0])
                         
                         #If it is not the target class then it is None
-                        if target_class == annotations[indexes][1]: 
+                        if (not target_type) or target_type == annotations[indexes][1]: 
                             curr_label = "B-" + annotations[indexes][1]
+                            curr_label = "B-KeyPhrase" #train for keyphrases (not Process, Task or Material)
                         else:
                             curr_label = "B-None"
 
@@ -136,11 +141,19 @@ if __name__ == "__main__":
 
                     text_file.close()
                     train_sents.append(train_sent)
-        if debug:
-            print >> sys.stderr, kpc.sent2features(train_sents[0])[0]
-        X_train = [kpc.sent2features(s) for s in train_sents]
-        y_train = [kpc.sent2labels(s) for s in train_sents]
-        
+        if debug and False:
+            if extra_features:
+                print >> sys.stderr, kpc.sent2features_extra(train_sents[0], qr)[0]
+            else:
+                print >> sys.stderr, kpc.sent2features(train_sents[0])[0]
+
+        if extra_features:
+            X_train = [kpc.sent2features_extra(s, qr) for s in train_sents]
+            y_train = [kpc.sent2labels(s) for s in train_sents]
+        else:
+            X_train = [kpc.sent2features(s) for s in train_sents]
+            y_train = [kpc.sent2labels(s) for s in train_sents]
+       
         trainer = pycrfsuite.Trainer(verbose=False)
         for xseq, yseq in zip(X_train, y_train):
             trainer.append(xseq, yseq)
@@ -152,7 +165,7 @@ if __name__ == "__main__":
                 'feature.possible_transitions': True
         })
         trainer.params()
-        trainer.train('keyphrase_projection' + ( '.' + target_class if target_class != '' else '' ) + '.crfsuite')
+        trainer.train('keyphrase_projection' + ( '.' + target_type if target_type != '' else '' ) + '.crfsuite')
         print trainer.logparser.last_iteration
     except:
         print >> sys.stderr
