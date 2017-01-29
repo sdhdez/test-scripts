@@ -143,7 +143,7 @@ if __name__ == "__main__":
                     print >> sys.stderr, file_count, training_crfsuite
 
                     #kp_list = kpc.shortest_keyphrases(kp_list)
-                    #kp_list = kpc.largest_keyphrases(kp_list) 
+                    kp_list = kpc.largest_keyphrases(kp_list) 
                     #kp_list = kpc.deal_with_overlapping(kp_list) 
         
                     kp_index = 0
@@ -151,7 +151,7 @@ if __name__ == "__main__":
                         kp_index += 1 
                         start = kp[1]
                         end = kp[2]
-                        print kp, raw_text[start:end]
+                        print kp
                         term_string = "T" + str(kp_index) + "\t" + kp[0] + " " + str(start) + " " + str(end) + "\t" + raw_text[start:end]
                         term_string = term_string.encode("utf-8")
                         print >> kpe_file, term_string

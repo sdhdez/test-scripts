@@ -6,6 +6,7 @@ from nltk.tag.perceptron import PerceptronTagger
 import operator
 import pycrfsuite
 import kpcommon as kpc
+import mdb_common_lib as mdbcl
 
 if __name__ == "__main__":
     try:
@@ -14,7 +15,12 @@ if __name__ == "__main__":
         file_count = 0
 
         dir_corpus = sys.argv[1]
-        
+       
+        extra_features = True
+        qr = mdbcl.QueryResources()
+
+        without_types = False
+
         tokenizer = Tokenizer()
         #pos
         tagger = PerceptronTagger()
@@ -52,7 +58,11 @@ if __name__ == "__main__":
                                 indexes_kp_tmp[type_indexes[1]] = type_indexes[2]
                             ann_text = ann_items[2]
                             tokens = tokenizer.tokenize(ann_text)
-                            pos_tags = [t + (type_indexes[0],)  for t in tagger.tag(tokens)]
+                            if without_types:
+                                annotation_type = 'KeyPhrase'
+                            else:
+                                annotation_type = type_indexes[0]
+                            pos_tags = [t + (annotation_type,)  for t in tagger.tag(tokens)]
                             if pos_tags:
                                 pos_tags[0] = pos_tags[0][0:2] + ("B-" + pos_tags[0][2],)
                                 if debug:
@@ -97,6 +107,7 @@ if __name__ == "__main__":
                         key_index = str(start) + " " + str(end)
                         if start == 0:
                             if key_index in annotations:
+                                print "annotations[key_index] ... ", annotations[key_index]
                                 train_sent += annotations[key_index]
                             i = end
                             continue
@@ -119,6 +130,8 @@ if __name__ == "__main__":
                         not_kp_text = raw_text[end:len_raw_text].strip("\n")
                         tokens = tokenizer.tokenize(not_kp_text)
                         pos_tags = [t + ("None",)  for t in tagger.tag(tokens)]
+                        if pos_tags:
+                            pos_tags[0] = pos_tags[0][0:2] + ("B-" + pos_tags[0][2],)
                         train_sent += pos_tags
                         #print >> nokp_file, end, str(len_raw_text) + "\t" + not_kp_text + "\t" + pos_tags
                     if debug:
@@ -130,9 +143,14 @@ if __name__ == "__main__":
 
                     train_sents.append(train_sent)
 
-        if debug:
+        if debug and False:
             print >> sys.stderr, kpc.sent2features(train_sents[0])[0]
-        X_train = [kpc.sent2features(s) for s in train_sents]
+
+        if extra_features:
+            X_train = [kpc.sent2features_extra(s, qr) for s in train_sents]
+        else:
+            X_train = [kpc.sent2features(s) for s in train_sents]
+
         y_train = [kpc.sent2labels(s) for s in train_sents]
         
         trainer = pycrfsuite.Trainer(verbose=False)
@@ -146,7 +164,7 @@ if __name__ == "__main__":
                 'feature.possible_transitions': True
         })
         trainer.params()
-        trainer.train('keyphrase.crfsuite')
+        trainer.train('keyphrase_crf_extra_features.crfsuite')
         print trainer.logparser.last_iteration
     except:
         print >> sys.stderr

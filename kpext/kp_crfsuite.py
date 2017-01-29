@@ -12,6 +12,7 @@ import sklearn
 import pycrfsuite
 import re
 import kpcommon as kpc 
+import mdb_common_lib as mdbcl
 
 if __name__ == "__main__":
     try:
@@ -29,6 +30,9 @@ if __name__ == "__main__":
         tokenizer = Tokenizer()
         #pos
         tagger = PerceptronTagger()
+
+        extra_features = True
+        qr = mdbcl.QueryResources()
 
         crftagger = pycrfsuite.Tagger()
         crftagger.open(training_crfsuite)
@@ -52,7 +56,11 @@ if __name__ == "__main__":
                     tagged_text = [t + ("None",)  for t in tagger.tag(tokens)]
                     text_file.close()
                     #test_sents.append(tagged_text)
-                    X_test = kpc.sent2features(tagged_text)
+                    if extra_features:
+                        X_test = kpc.sent2features_extra(tagged_text, qr)
+                    else:
+                        X_test = kpc.sent2features(tagged_text)
+
                     is_not_kp = "None"
                     tmp_label = is_not_kp
                     new_kp = []
