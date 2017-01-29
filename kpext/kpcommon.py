@@ -239,7 +239,7 @@ def word2features_extra(sent, i, qr):
         word1 = sent[i-1][0]
         postag1 = sent[i-1][1]
 
-        is_bigram = qr.is_bigram_in_titles(word1, word)
+        ngram_in_msag = qr.is_bigram_in_titles(word1, word)
 
         features.extend([
             '-1:word.lower=' + word1.lower(),
@@ -247,7 +247,7 @@ def word2features_extra(sent, i, qr):
             '-1:word.isupper=%s' % word1.isupper(),
             '-1:postag=' + postag1,
             '-1:postag[:2]=' + postag1[:2],
-            #'-1:bigram=%s' % is_bigram,
+            '-1:bigram_in_msag=%s' % ngram_in_msag,
         ])
     else:
         features.append('BOS')
@@ -256,7 +256,7 @@ def word2features_extra(sent, i, qr):
         word1 = sent[i+1][0]
         postag1 = sent[i+1][1]
 
-        is_bigram = qr.is_bigram_in_titles(word, word1)
+        ngram_in_msag = qr.is_bigram_in_titles(word, word1)
 
         features.extend([
             '+1:word.lower=' + word1.lower(),
@@ -264,11 +264,25 @@ def word2features_extra(sent, i, qr):
             '+1:word.isupper=%s' % word1.isupper(),
             '+1:postag=' + postag1,
             '+1:postag[:2]=' + postag1[:2],
-            #'+1:bigram=%s' % is_bigram,
+            '+1:bigram_in_msag=%s' % ngram_in_msag,
         ])
     else:
         features.append('EOS')
-    print features                
+     
+    if i > 0 and i < len(sent)-1:
+        
+        word1, word3 = sent[i-1][0], sent[i+1][0]
+        ngram_in_msag = qr.is_trigram_pos_in_titles(word1, word, word3)
+        features.extend([
+            'trigram_in_msag=%s' % ngram_in_msag,
+        ])
+        postag1, postag3 = sent[i-1][1], sent[i+1][1]
+        ngram_pos_in_msag = qr.is_trigram_pos_in_titles(postag1, postag, postag3)
+        features.extend([
+            'trigram_pos_in_msag=%s' % ngram_pos_in_msag,
+        ])
+
+    #print features                
     return features
 
 def sent2features(sent):

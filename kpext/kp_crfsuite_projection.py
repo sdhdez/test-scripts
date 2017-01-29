@@ -34,7 +34,7 @@ if __name__ == "__main__":
         crftagger = pycrfsuite.Tagger()
         crftagger.open(training_crfsuite)
 
-        extra_features = False
+        extra_features = True
         qr = mdbcl.QueryResources()
 
         #test_sents = []

@@ -21,11 +21,12 @@ if __name__ == "__main__":
         #pos
         tagger = PerceptronTagger()
 
-        extra_features = True
         qr = mdbcl.QueryResources()
 
-        train_sents = []
+        extra_features = True
+        without_types = True
 
+        train_sents = []
         for (dirname, _, filenames) in os.walk(dir_corpus):
             for f in filenames:
                 ext = f[-4:]
@@ -114,11 +115,14 @@ if __name__ == "__main__":
                             last_label = "B-None"
                             train_labels.append(last_label)
                         train_tokens.append(annotation_tokens[0])
-                        
+                       
+                        annotation_type = annotations[indexes][1]
+                        if without_types and annotation_type != "None":
+                            annotation_type = "KeyPhrase" #train for keyphrases (not Process, Task or Material)
+
                         #If it is not the target class then it is None
-                        if (not target_type) or target_type == annotations[indexes][1]: 
-                            curr_label = "B-" + annotations[indexes][1]
-                            curr_label = "B-KeyPhrase" #train for keyphrases (not Process, Task or Material)
+                        if (not target_type) or target_type == annotation_type: 
+                            curr_label = "B-" + annotation_type
                         else:
                             curr_label = "B-None"
 
@@ -128,7 +132,7 @@ if __name__ == "__main__":
                             train_labels.append(curr_label)
                         for antk in  annotation_tokens[1:]:
                             train_tokens.append(antk)
-                            train_labels.append(annotations[indexes][1])
+                            train_labels.append(annotation_type)
                         if next_token:
                             train_tokens.append(next_token)
                             if last_label == curr_label:
